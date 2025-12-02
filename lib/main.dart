@@ -7,8 +7,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: FirebaseOptions(
-      //we need a firebase acc for our group !
-      apiKey: "AIzaSyB0BxpvMWLVHUrtXFaDFyhomPpGnGpIvcI",
+      //this api key, I hide it for security ; we will share it in the meeting
+     // apiKey: "",
       //authDomain: "appfb-7123f.firebaseapp.com",
       projectId: "testing-22fda",
       //storageBucket: "appfb-7123f.appspot.com",
