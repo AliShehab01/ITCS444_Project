@@ -69,10 +69,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
           );
         }
       } finally {
@@ -99,9 +96,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         break;
     }
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (context) => homeScreen),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (context) => homeScreen));
   }
 
   @override
@@ -237,7 +234,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   decoration: InputDecoration(
                     labelText: 'Confirm Password',
                     labelStyle: TextStyle(color: Colors.grey[400]),
-                    prefixIcon: Icon(Icons.lock_outline, color: Colors.grey[400]),
+                    prefixIcon: Icon(
+                      Icons.lock_outline,
+                      color: Colors.grey[400],
+                    ),
                     suffixIcon: IconButton(
                       icon: Icon(
                         _obscureConfirmPassword
@@ -340,16 +340,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       Text(
                         'Select Role',
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.grey[400], fontSize: 16),
                       ),
                       const SizedBox(height: 8),
                       ...UserRole.values.map((role) {
                         // Don't show guest option in registration
-                        if (role == UserRole.guest) return const SizedBox.shrink();
-                        
+                        if (role == UserRole.guest)
+                          return const SizedBox.shrink();
+
                         return RadioListTile<UserRole>(
                           title: Text(
                             role.displayName,
@@ -384,10 +382,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     children: [
                       Text(
                         'Preferred Contact Method',
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.grey[400], fontSize: 16),
                       ),
                       const SizedBox(height: 8),
                       RadioListTile<String>(
@@ -460,8 +455,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : const Text(

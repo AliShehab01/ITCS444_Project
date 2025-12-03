@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'config/env_config.dart';
 import 'services/auth_service.dart';
 import 'models/user_model.dart';
 import 'models/user_role.dart';
@@ -11,16 +13,17 @@ import 'screens/home/guest_home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Load environment variables
+  await dotenv.load(fileName: ".env");
+
+  // Initialize Firebase with environment variables
   await Firebase.initializeApp(
     options: FirebaseOptions(
-      //this api key, I hide it for security ; we will share it in the meeting
-      apiKey: "AIzaSyB0BxpvMWLVHUrtXFaDFyhomPpGnGpIvcI",
-      //authDomain: "appfb-7123f.firebaseapp.com",
-      projectId: "testing-22fda",
-      //storageBucket: "appfb-7123f.appspot.com",
-      messagingSenderId: "421309501948",
-      appId: "1:421309501948:web:6df14606227098d844e279",
-      //measurementId: "G-24WW5SKLJ5"
+      apiKey: EnvConfig.firebaseApiKey,
+      projectId: EnvConfig.firebaseProjectId,
+      messagingSenderId: EnvConfig.firebaseMessagingSenderId,
+      appId: EnvConfig.firebaseAppId,
     ),
   );
 
@@ -35,10 +38,7 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'ITCS444 Project',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-        brightness: Brightness.dark,
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue, brightness: Brightness.dark),
       home: const AuthWrapper(),
     );
   }
@@ -59,9 +59,7 @@ class AuthWrapper extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
             backgroundColor: Colors.black,
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -73,15 +71,13 @@ class AuthWrapper extends StatelessWidget {
               if (userSnapshot.connectionState == ConnectionState.waiting) {
                 return const Scaffold(
                   backgroundColor: Colors.black,
-                  body: Center(
-                    child: CircularProgressIndicator(),
-                  ),
+                  body: Center(child: CircularProgressIndicator()),
                 );
               }
 
               if (userSnapshot.hasData && userSnapshot.data != null) {
                 final user = userSnapshot.data!;
-                
+
                 // Navigate based on user role
                 switch (user.role) {
                   case UserRole.admin:

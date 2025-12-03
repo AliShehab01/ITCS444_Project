@@ -67,7 +67,8 @@ class UserModel {
       name: name ?? this.name,
       contact: contact ?? this.contact,
       idNumber: idNumber ?? this.idNumber,
-      preferredContactMethod: preferredContactMethod ?? this.preferredContactMethod,
+      preferredContactMethod:
+          preferredContactMethod ?? this.preferredContactMethod,
       role: role ?? this.role,
       createdAt: createdAt ?? this.createdAt,
     );

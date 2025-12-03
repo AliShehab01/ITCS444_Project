@@ -16,9 +16,7 @@ class AdminHome extends StatelessWidget {
             icon: const Icon(Icons.person),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ProfilePage(),
-                ),
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
               );
             },
           ),
@@ -130,7 +128,8 @@ class AdminHome extends StatelessWidget {
                     // TODO: Navigate to rental requests
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('Rental Requests - Coming Soon')),
+                        content: Text('Rental Requests - Coming Soon'),
+                      ),
                     );
                   },
                 ),
@@ -208,11 +207,7 @@ class AdminHome extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 48,
-                color: color,
-              ),
+              Icon(icon, size: 48, color: color),
               const SizedBox(height: 12),
               Text(
                 title,
@@ -226,10 +221,7 @@ class AdminHome extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[400], fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -239,7 +231,12 @@ class AdminHome extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       color: Colors.grey[850],
       child: Padding(
@@ -258,10 +255,7 @@ class AdminHome extends StatelessWidget {
             ),
             Text(
               label,
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[400], fontSize: 12),
             ),
           ],
         ),

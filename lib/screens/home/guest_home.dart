@@ -15,16 +15,11 @@ class GuestHome extends StatelessWidget {
           TextButton.icon(
             onPressed: () {
               Navigator.of(context).pushReplacement(
-                MaterialPageRoute(
-                  builder: (context) => const LoginScreen(),
-                ),
+                MaterialPageRoute(builder: (context) => const LoginScreen()),
               );
             },
             icon: const Icon(Icons.login, color: Colors.white),
-            label: const Text(
-              'Login',
-              style: TextStyle(color: Colors.white),
-            ),
+            label: const Text('Login', style: TextStyle(color: Colors.white)),
           ),
         ],
       ),
@@ -43,11 +38,7 @@ class GuestHome extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.visibility,
-                          size: 40,
-                          color: Colors.white,
-                        ),
+                        Icon(Icons.visibility, size: 40, color: Colors.white),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -154,8 +145,7 @@ class GuestHome extends StatelessWidget {
                 onTap: () {
                   // TODO: Navigate to browse items
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                        content: Text('Browse Items - Coming Soon')),
+                    const SnackBar(content: Text('Browse Items - Coming Soon')),
                   );
                 },
                 borderRadius: BorderRadius.circular(12),
@@ -163,11 +153,7 @@ class GuestHome extends StatelessWidget {
                   padding: const EdgeInsets.all(20.0),
                   child: Row(
                     children: [
-                      Icon(
-                        Icons.storefront,
-                        size: 48,
-                        color: Colors.blue[400],
-                      ),
+                      Icon(Icons.storefront, size: 48, color: Colors.blue[400]),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
@@ -192,10 +178,7 @@ class GuestHome extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Icon(
-                        Icons.arrow_forward_ios,
-                        color: Colors.grey[400],
-                      ),
+                      Icon(Icons.arrow_forward_ios, color: Colors.grey[400]),
                     ],
                   ),
                 ),
@@ -241,9 +224,7 @@ class GuestHome extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (context) => const LoginScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
                 );
               },
               style: ElevatedButton.styleFrom(
@@ -257,10 +238,7 @@ class GuestHome extends StatelessWidget {
               ),
               child: const Text(
                 'Login to Get Started',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -307,10 +285,7 @@ class GuestHome extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(
-                    color: Colors.grey[400],
-                    fontSize: 12,
-                  ),
+                  style: TextStyle(color: Colors.grey[400], fontSize: 12),
                 ),
               ],
             ),

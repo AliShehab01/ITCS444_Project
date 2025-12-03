@@ -14,11 +14,11 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final _authService = AuthService();
   final _formKey = GlobalKey<FormState>();
-  
+
   final _nameController = TextEditingController();
   final _contactController = TextEditingController();
   final _idNumberController = TextEditingController();
-  
+
   UserModel? _currentUser;
   bool _isLoading = true;
   bool _isEditing = false;
@@ -106,10 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(e.toString()),
-              backgroundColor: Colors.red,
-            ),
+            SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
           );
         }
       } finally {
@@ -127,10 +124,7 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: Colors.grey[850],
-        title: const Text(
-          'Sign Out',
-          style: TextStyle(color: Colors.white),
-        ),
+        title: const Text('Sign Out', style: TextStyle(color: Colors.white)),
         content: const Text(
           'Are you sure you want to sign out?',
           style: TextStyle(color: Colors.white70),
@@ -138,17 +132,11 @@ class _ProfilePageState extends State<ProfilePage> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: Text(
-              'Cancel',
-              style: TextStyle(color: Colors.grey[400]),
-            ),
+            child: Text('Cancel', style: TextStyle(color: Colors.grey[400])),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(
-              'Sign Out',
-              style: TextStyle(color: Colors.red[400]),
-            ),
+            child: Text('Sign Out', style: TextStyle(color: Colors.red[400])),
           ),
         ],
       ),
@@ -174,9 +162,7 @@ class _ProfilePageState extends State<ProfilePage> {
           backgroundColor: Colors.grey[850],
           title: const Text('Profile'),
         ),
-        body: const Center(
-          child: CircularProgressIndicator(),
-        ),
+        body: const Center(child: CircularProgressIndicator()),
       );
     }
 
@@ -195,10 +181,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 });
               },
             ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: _signOut,
-          ),
+          IconButton(icon: const Icon(Icons.logout), onPressed: _signOut),
         ],
       ),
       body: SingleChildScrollView(
@@ -211,17 +194,16 @@ class _ProfilePageState extends State<ProfilePage> {
               CircleAvatar(
                 radius: 60,
                 backgroundColor: Colors.blue[400],
-                child: Icon(
-                  Icons.person,
-                  size: 60,
-                  color: Colors.white,
-                ),
+                child: Icon(Icons.person, size: 60, color: Colors.white),
               ),
               const SizedBox(height: 24),
 
               // Role Badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 decoration: BoxDecoration(
                   color: _getRoleColor(_currentUser?.role ?? UserRole.guest),
                   borderRadius: BorderRadius.circular(20),
@@ -356,10 +338,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     children: [
                       Text(
                         'Preferred Contact Method',
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 16,
-                        ),
+                        style: TextStyle(color: Colors.grey[400], fontSize: 16),
                       ),
                       RadioListTile<String>(
                         title: const Text(
@@ -421,10 +400,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   subtitle: Text(
                     _preferredContactMethod.toUpperCase(),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 16),
                   ),
                   tileColor: Colors.grey[850],
                   shape: RoundedRectangleBorder(
@@ -452,8 +428,9 @@ class _ProfilePageState extends State<ProfilePage> {
                           width: 20,
                           child: CircularProgressIndicator(
                             strokeWidth: 2,
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.white),
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
                           ),
                         )
                       : const Text(
@@ -487,10 +464,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                   child: const Text(
                     'Cancel',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ],
@@ -536,10 +510,7 @@ class _ProfilePageState extends State<ProfilePage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(color: Colors.grey[500]),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[500])),
         Flexible(
           child: Text(
             value,

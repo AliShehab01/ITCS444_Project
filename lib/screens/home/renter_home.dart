@@ -16,9 +16,7 @@ class RenterHome extends StatelessWidget {
             icon: const Icon(Icons.person),
             onPressed: () {
               Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (context) => const ProfilePage(),
-                ),
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
               );
             },
           ),
@@ -39,11 +37,7 @@ class RenterHome extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(
-                          Icons.shopping_bag,
-                          size: 40,
-                          color: Colors.white,
-                        ),
+                        Icon(Icons.shopping_bag, size: 40, color: Colors.white),
                         const SizedBox(width: 16),
                         Expanded(
                           child: Column(
@@ -121,7 +115,8 @@ class RenterHome extends StatelessWidget {
                     // TODO: Navigate to browse items
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
-                          content: Text('Browse Items - Coming Soon')),
+                        content: Text('Browse Items - Coming Soon'),
+                      ),
                     );
                   },
                 ),
@@ -225,11 +220,7 @@ class RenterHome extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 48,
-                color: color,
-              ),
+              Icon(icon, size: 48, color: color),
               const SizedBox(height: 12),
               Text(
                 title,
@@ -243,10 +234,7 @@ class RenterHome extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 subtitle,
-                style: TextStyle(
-                  color: Colors.grey[400],
-                  fontSize: 12,
-                ),
+                style: TextStyle(color: Colors.grey[400], fontSize: 12),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -256,7 +244,12 @@ class RenterHome extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Card(
       color: Colors.grey[850],
       child: Padding(
@@ -275,10 +268,7 @@ class RenterHome extends StatelessWidget {
             ),
             Text(
               label,
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey[400], fontSize: 12),
             ),
           ],
         ),

@@ -15,7 +15,9 @@ class AuthService {
 
   // Sign in with email and password
   Future<UserModel?> signInWithEmailAndPassword(
-      String email, String password) async {
+    String email,
+    String password,
+  ) async {
     try {
       UserCredential result = await _auth.signInWithEmailAndPassword(
         email: email,
@@ -76,8 +78,10 @@ class AuthService {
   // Get user data from Firestore
   Future<UserModel?> getUserData(String uid) async {
     try {
-      DocumentSnapshot doc =
-          await _firestore.collection('users').doc(uid).get();
+      DocumentSnapshot doc = await _firestore
+          .collection('users')
+          .doc(uid)
+          .get();
       if (doc.exists) {
         return UserModel.fromMap(doc.data() as Map<String, dynamic>);
       }
@@ -150,7 +154,7 @@ class AuthService {
   Future<void> continueAsGuest() async {
     try {
       UserCredential result = await _auth.signInAnonymously();
-      
+
       if (result.user != null) {
         // Create guest user document
         UserModel guestUser = UserModel(
