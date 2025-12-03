@@ -1,0 +1,271 @@
+import 'package:flutter/material.dart';
+import '../profile_page.dart';
+
+class AdminHome extends StatelessWidget {
+  const AdminHome({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.grey[900],
+      appBar: AppBar(
+        backgroundColor: Colors.purple[400],
+        title: const Text('Admin Dashboard'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) => const ProfilePage(),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Welcome Card
+            Card(
+              color: Colors.purple[400],
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.admin_panel_settings,
+                          size: 40,
+                          color: Colors.white,
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Admin Portal',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              Text(
+                                'Donor Management',
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Admin Actions Section
+            Text(
+              'Admin Actions',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Action Cards Grid
+            GridView.count(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              children: [
+                _buildActionCard(
+                  context,
+                  icon: Icons.add_box,
+                  title: 'Add Item',
+                  subtitle: 'Donate new items',
+                  color: Colors.green[400]!,
+                  onTap: () {
+                    // TODO: Navigate to add item screen
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Add Item - Coming Soon')),
+                    );
+                  },
+                ),
+                _buildActionCard(
+                  context,
+                  icon: Icons.inventory,
+                  title: 'My Items',
+                  subtitle: 'Manage donations',
+                  color: Colors.blue[400]!,
+                  onTap: () {
+                    // TODO: Navigate to items list
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('My Items - Coming Soon')),
+                    );
+                  },
+                ),
+                _buildActionCard(
+                  context,
+                  icon: Icons.pending_actions,
+                  title: 'Rental Requests',
+                  subtitle: 'View pending requests',
+                  color: Colors.orange[400]!,
+                  onTap: () {
+                    // TODO: Navigate to rental requests
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                          content: Text('Rental Requests - Coming Soon')),
+                    );
+                  },
+                ),
+                _buildActionCard(
+                  context,
+                  icon: Icons.analytics,
+                  title: 'Analytics',
+                  subtitle: 'View statistics',
+                  color: Colors.teal[400]!,
+                  onTap: () {
+                    // TODO: Navigate to analytics
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Analytics - Coming Soon')),
+                    );
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Quick Stats Section
+            Text(
+              'Quick Stats',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Stats Cards
+            Row(
+              children: [
+                Expanded(
+                  child: _buildStatCard(
+                    'Total Items',
+                    '0',
+                    Icons.inventory_2,
+                    Colors.blue[400]!,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildStatCard(
+                    'Active Rentals',
+                    '0',
+                    Icons.schedule,
+                    Colors.green[400]!,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return Card(
+      color: Colors.grey[850],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                size: 48,
+                color: color,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 12,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildStatCard(String label, String value, IconData icon, Color color) {
+    return Card(
+      color: Colors.grey[850],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
