@@ -22,6 +22,30 @@ class _RentalRequestFormState extends State<RentalRequestForm> {
   DateTime? _startDate;
   DateTime? _endDate;
   bool _isLoading = false;
+  List<DateTimeRange> _reservedDates = [];
+  bool _loadingReservations = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadReservedDates();
+  }
+
+  Future<void> _loadReservedDates() async {
+    try {
+      final reserved = await _rentalService.getReservedDatesForItem(
+        widget.item.id,
+      );
+      setState(() {
+        _reservedDates = reserved;
+        _loadingReservations = false;
+      });
+    } catch (e) {
+      setState(() {
+        _loadingReservations = false;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -29,14 +53,26 @@ class _RentalRequestFormState extends State<RentalRequestForm> {
     super.dispose();
   }
 
+  bool _isDateReserved(DateTime date) {
+    for (var reserved in _reservedDates) {
+      if (!date.isBefore(reserved.start) && !date.isAfter(reserved.end)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   Future<void> _selectDateRange(BuildContext context) async {
-    final DateTimeRange? picked = await showDateRangePicker(
+    // First, select start date
+    final DateTime? startPicked = await showDatePicker(
       context: context,
+      initialDate: _startDate ?? DateTime.now(),
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
-      initialDateRange: _startDate != null && _endDate != null
-          ? DateTimeRange(start: _startDate!, end: _endDate!)
-          : null,
+      helpText: 'SELECT START DATE',
+      selectableDayPredicate: (date) {
+        return !_isDateReserved(date);
+      },
       builder: (context, child) {
         return Theme(
           data: ThemeData.dark().copyWith(
@@ -46,16 +82,58 @@ class _RentalRequestFormState extends State<RentalRequestForm> {
               surface: Colors.grey[850]!,
               onSurface: Colors.white,
             ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: Colors.green[400]),
+            ),
           ),
           child: child!,
         );
       },
     );
 
-    if (picked != null) {
+    if (startPicked == null || !context.mounted) return;
+
+    // Then select end date
+    final DateTime? endPicked = await showDatePicker(
+      context: context,
+      initialDate: startPicked.add(const Duration(days: 1)),
+      firstDate: startPicked,
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      helpText: 'SELECT END DATE',
+      selectableDayPredicate: (date) {
+        if (date.isBefore(startPicked)) return false;
+
+        DateTime current = startPicked;
+        while (!current.isAfter(date)) {
+          if (_isDateReserved(current)) {
+            return false;
+          }
+          current = current.add(const Duration(days: 1));
+        }
+        return true;
+      },
+      builder: (context, child) {
+        return Theme(
+          data: ThemeData.dark().copyWith(
+            colorScheme: ColorScheme.dark(
+              primary: Colors.green[400]!,
+              onPrimary: Colors.white,
+              surface: Colors.grey[850]!,
+              onSurface: Colors.white,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(foregroundColor: Colors.green[400]),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (endPicked != null && mounted) {
       setState(() {
-        _startDate = picked.start;
-        _endDate = picked.end;
+        _startDate = startPicked;
+        _endDate = endPicked;
       });
     }
   }
@@ -87,6 +165,31 @@ class _RentalRequestFormState extends State<RentalRequestForm> {
       });
 
       try {
+        // Check if dates are available
+        final isAvailable = await _rentalService.isDateRangeAvailable(
+          widget.item.id,
+          _startDate!,
+          _endDate!,
+        );
+
+        if (!isAvailable) {
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Selected dates are not available. Please choose different dates.',
+                ),
+                backgroundColor: Colors.red,
+                duration: Duration(seconds: 4),
+              ),
+            );
+          }
+          setState(() {
+            _isLoading = false;
+          });
+          return;
+        }
+
         final user = _authService.currentUser;
         if (user == null) throw 'User not authenticated';
 
@@ -188,6 +291,135 @@ class _RentalRequestFormState extends State<RentalRequestForm> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+
+              // Reserved Dates Info
+              if (_loadingReservations)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.grey[850],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.orange[400],
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Text(
+                        'Loading availability...',
+                        style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                      ),
+                    ],
+                  ),
+                )
+              else if (_reservedDates.isNotEmpty)
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.orange[400]!.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.orange[400]!.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.orange[400],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Reserved Dates',
+                            style: TextStyle(
+                              color: Colors.orange[400],
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      ..._reservedDates.take(3).map((range) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.block,
+                                color: Colors.orange[400],
+                                size: 16,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                '${range.start.day}/${range.start.month}/${range.start.year} - ${range.end.day}/${range.end.month}/${range.end.year}',
+                                style: TextStyle(
+                                  color: Colors.grey[300],
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      if (_reservedDates.length > 3)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            '+ ${_reservedDates.length - 3} more reservation(s)',
+                            style: TextStyle(
+                              color: Colors.grey[500],
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                )
+              else
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.green[400]!.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.green[400]!.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.check_circle_outline,
+                        color: Colors.green[400],
+                        size: 20,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'This item has no reservations - available anytime!',
+                          style: TextStyle(
+                            color: Colors.green[400],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               const SizedBox(height: 24),
 
               // Start Date
@@ -221,15 +453,29 @@ class _RentalRequestFormState extends State<RentalRequestForm> {
                         children: [
                           Icon(Icons.date_range, color: Colors.green[400]),
                           const SizedBox(width: 12),
-                          Text(
-                            'Select Rental Period',
-                            style: TextStyle(
-                              color: Colors.grey[400],
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Select Rental Period',
+                                  style: TextStyle(
+                                    color: Colors.grey[400],
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                if (_reservedDates.isNotEmpty)
+                                  Text(
+                                    'Reserved dates will be disabled',
+                                    style: TextStyle(
+                                      color: Colors.orange[400],
+                                      fontSize: 11,
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
-                          const Spacer(),
                           Icon(
                             Icons.arrow_forward_ios,
                             color: Colors.grey[600],

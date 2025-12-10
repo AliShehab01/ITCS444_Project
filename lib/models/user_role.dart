@@ -1,5 +1,5 @@
 enum UserRole {
-  admin, // Donor
+  admin, // Manages inventory and reservations
   renter,
   guest,
 }
@@ -8,7 +8,7 @@ extension UserRoleExtension on UserRole {
   String get displayName {
     switch (this) {
       case UserRole.admin:
-        return 'Admin (Donor)';
+        return 'Admin';
       case UserRole.renter:
         return 'Renter';
       case UserRole.guest:

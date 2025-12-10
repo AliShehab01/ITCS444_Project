@@ -286,8 +286,9 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 validator: (value) {
-                  if (_isEditing && 
-                      (_preferredContactMethod == 'phone' || _preferredContactMethod == 'sms') &&
+                  if (_isEditing &&
+                      (_preferredContactMethod == 'phone' ||
+                          _preferredContactMethod == 'sms') &&
                       (value == null || value.isEmpty)) {
                     return 'Contact number is required for phone/SMS contact';
                   }
@@ -479,7 +480,10 @@ class _ProfilePageState extends State<ProfilePage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('User ID', style: TextStyle(color: Colors.grey[500])),
+                          Text(
+                            'User ID',
+                            style: TextStyle(color: Colors.grey[500]),
+                          ),
                           Flexible(
                             child: Text(
                               _currentUser?.uid ?? 'N/A',

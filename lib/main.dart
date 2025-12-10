@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'config/env_config.dart';
 import 'services/auth_service.dart';
+import 'services/rental_service.dart';
 import 'models/user_model.dart';
 import 'models/user_role.dart';
 import 'screens/login_screen.dart';
@@ -26,6 +27,10 @@ void main() async {
       appId: EnvConfig.firebaseAppId,
     ),
   );
+
+  // Check for overdue rentals and send notifications
+  final rentalService = RentalService();
+  rentalService.checkAndSendRentalReminders();
 
   runApp(const MainApp());
 }

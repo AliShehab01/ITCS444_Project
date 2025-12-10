@@ -4,9 +4,25 @@ import '../equipment/add_edit_equipment_screen.dart';
 import '../equipment/browse_equipment_screen.dart';
 import '../rental/admin_rental_list.dart';
 import '../donation/admin_donation_review.dart';
+import '../notifications/notifications_screen.dart';
+import '../../services/notification_service.dart';
 
-class AdminHome extends StatelessWidget {
+class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
+
+  @override
+  State<AdminHome> createState() => _AdminHomeState();
+}
+
+class _AdminHomeState extends State<AdminHome> {
+  final _notificationService = NotificationService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Check for overdue rentals when admin opens the app
+    _notificationService.checkRentalDueDates();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,6 +32,55 @@ class AdminHome extends StatelessWidget {
         backgroundColor: Colors.purple[400],
         title: const Text('Admin Dashboard'),
         actions: [
+          // Notification Bell with Badge
+          StreamBuilder<int>(
+            stream: _notificationService.getAdminUnreadCount(),
+            builder: (context, snapshot) {
+              final unreadCount = snapshot.data ?? 0;
+              return Stack(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.notifications),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => const NotificationsScreen(
+                            userId: 'admin',
+                            isAdmin: true,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  if (unreadCount > 0)
+                    Positioned(
+                      right: 8,
+                      top: 8,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.red,
+                          shape: BoxShape.circle,
+                        ),
+                        constraints: const BoxConstraints(
+                          minWidth: 18,
+                          minHeight: 18,
+                        ),
+                        child: Text(
+                          unreadCount > 9 ? '9+' : unreadCount.toString(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
@@ -119,7 +184,8 @@ class AdminHome extends StatelessWidget {
                   onTap: () {
                     Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (context) => const BrowseEquipmentScreen(),
+                        builder: (context) =>
+                            const BrowseEquipmentScreen(showMyItemsOnly: true),
                       ),
                     );
                   },

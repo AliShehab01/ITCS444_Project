@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/equipment_item.dart';
 import '../../services/equipment_service.dart';
 import '../../services/auth_service.dart';
@@ -259,6 +260,7 @@ class _AddEditEquipmentScreenState extends State<AddEditEquipmentScreen> {
                 controller: _quantityController,
                 style: const TextStyle(color: Colors.white),
                 keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 decoration: InputDecoration(
                   labelText: 'Quantity *',
                   labelStyle: TextStyle(color: Colors.grey[400]),
@@ -301,7 +303,10 @@ class _AddEditEquipmentScreenState extends State<AddEditEquipmentScreen> {
               TextFormField(
                 controller: _rentalPriceController,
                 style: const TextStyle(color: Colors.white),
-                keyboardType: TextInputType.number,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+                ],
                 decoration: InputDecoration(
                   labelText: 'Rental Price Per Day (Optional)',
                   labelStyle: TextStyle(color: Colors.grey[400]),

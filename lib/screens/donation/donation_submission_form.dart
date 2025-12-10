@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/donation_submission.dart';
 import '../../models/equipment_item.dart';
 import '../../services/donation_service.dart';
@@ -24,7 +25,38 @@ class _DonationSubmissionFormState extends State<DonationSubmissionForm> {
 
   EquipmentType? _selectedType;
   ItemCondition? _selectedCondition;
+  String? _selectedIcon;
   bool _isSubmitting = false;
+
+  // Map equipment types to icons
+  final Map<EquipmentType, IconData> _typeIcons = {
+    EquipmentType.wheelchair: Icons.accessible,
+    EquipmentType.walker: Icons.elderly,
+    EquipmentType.crutches: Icons.assist_walker,
+    EquipmentType.hospitalBed: Icons.bed,
+    EquipmentType.oxygenMachine: Icons.air,
+    EquipmentType.commode: Icons.chair,
+    EquipmentType.bathChair: Icons.bathtub,
+    EquipmentType.ramp: Icons.moving,
+    EquipmentType.liftChair: Icons.event_seat,
+    EquipmentType.other: Icons.medical_services,
+  };
+
+  // Available icons for selection
+  final List<Map<String, dynamic>> _availableIcons = [
+    {'icon': Icons.accessible, 'name': 'wheelchair'},
+    {'icon': Icons.elderly, 'name': 'walker'},
+    {'icon': Icons.assist_walker, 'name': 'crutches'},
+    {'icon': Icons.bed, 'name': 'hospital_bed'},
+    {'icon': Icons.air, 'name': 'oxygen'},
+    {'icon': Icons.chair, 'name': 'chair'},
+    {'icon': Icons.bathtub, 'name': 'bath'},
+    {'icon': Icons.event_seat, 'name': 'seat'},
+    {'icon': Icons.medical_services, 'name': 'medical'},
+    {'icon': Icons.healing, 'name': 'healing'},
+    {'icon': Icons.health_and_safety, 'name': 'health'},
+    {'icon': Icons.medication, 'name': 'medication'},
+  ];
 
   @override
   void dispose() {
@@ -76,7 +108,8 @@ class _DonationSubmissionFormState extends State<DonationSubmissionForm> {
         itemName: _itemNameController.text.trim(),
         description: _descriptionController.text.trim(),
         condition: _selectedCondition!.displayName,
-        imageUrls: [], // TODO: Add image upload
+        imageUrls: [],
+        selectedIcon: _selectedIcon,
         quantity: int.parse(_quantityController.text),
         location: _locationController.text.trim(),
         status: DonationStatus.pending,
@@ -181,15 +214,116 @@ class _DonationSubmissionFormState extends State<DonationSubmissionForm> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
-                  prefixIcon: Icon(Icons.category, color: Colors.grey[400]),
+                  prefixIcon: Icon(
+                    _selectedType != null
+                        ? _typeIcons[_selectedType]
+                        : Icons.category,
+                    color: Colors.grey[400],
+                  ),
                 ),
                 items: EquipmentType.values.map((type) {
                   return DropdownMenuItem(
                     value: type,
-                    child: Text(type.displayName),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _typeIcons[type],
+                          color: Colors.orange[400],
+                          size: 20,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(type.displayName),
+                      ],
+                    ),
                   );
                 }).toList(),
-                onChanged: (value) => setState(() => _selectedType = value),
+                onChanged: (value) {
+                  setState(() {
+                    _selectedType = value;
+                    // Auto-select matching icon
+                    if (value != null && _typeIcons.containsKey(value)) {
+                      _selectedIcon = _availableIcons.firstWhere(
+                        (i) => i['icon'] == _typeIcons[value],
+                        orElse: () => _availableIcons.first,
+                      )['name'];
+                    }
+                  });
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // Icon Selection
+              Text(
+                'Select Icon for Item',
+                style: TextStyle(color: Colors.grey[300], fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.grey[850],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 12,
+                      children: _availableIcons.map((iconData) {
+                        final isSelected = _selectedIcon == iconData['name'];
+                        return GestureDetector(
+                          onTap: () {
+                            setState(() => _selectedIcon = iconData['name']);
+                          },
+                          child: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? Colors.orange[400]
+                                  : Colors.grey[800],
+                              borderRadius: BorderRadius.circular(12),
+                              border: isSelected
+                                  ? Border.all(
+                                      color: Colors.orange[300]!,
+                                      width: 2,
+                                    )
+                                  : null,
+                            ),
+                            child: Icon(
+                              iconData['icon'],
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.grey[400],
+                              size: 28,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                    if (_selectedIcon != null) ...[
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle,
+                            color: Colors.green[400],
+                            size: 16,
+                          ),
+                          const SizedBox(width: 6),
+                          Text(
+                            'Selected: ${_selectedIcon!.replaceAll('_', ' ')}',
+                            style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 12,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ],
+                ),
               ),
               const SizedBox(height: 16),
 
@@ -292,6 +426,7 @@ class _DonationSubmissionFormState extends State<DonationSubmissionForm> {
                           controller: _quantityController,
                           style: const TextStyle(color: Colors.white),
                           keyboardType: TextInputType.number,
+                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.grey[850],

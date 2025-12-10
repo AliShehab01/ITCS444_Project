@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../models/equipment_item.dart';
+import '../../models/user_role.dart';
 import '../../services/equipment_service.dart';
+import '../../services/auth_service.dart';
 import 'equipment_detail_screen.dart';
+import 'add_edit_equipment_screen.dart';
 
 class BrowseEquipmentScreen extends StatefulWidget {
-  const BrowseEquipmentScreen({super.key});
+  final bool showMyItemsOnly;
+
+  const BrowseEquipmentScreen({super.key, this.showMyItemsOnly = false});
 
   @override
   State<BrowseEquipmentScreen> createState() => _BrowseEquipmentScreenState();
@@ -12,12 +17,31 @@ class BrowseEquipmentScreen extends StatefulWidget {
 
 class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
   final _equipmentService = EquipmentService();
+  final _authService = AuthService();
   final _searchController = TextEditingController();
 
   String _searchQuery = '';
   EquipmentType? _filterType;
   ItemStatus? _filterStatus;
   bool _showDonatedOnly = false;
+  bool _showMyItemsOnly = false;
+  UserRole? _userRole;
+
+  @override
+  void initState() {
+    super.initState();
+    _showMyItemsOnly = widget.showMyItemsOnly;
+    _loadUserRole();
+  }
+
+  Future<void> _loadUserRole() async {
+    final user = await _authService.getUserData(_authService.currentUser?.uid ?? '');
+    if (user != null && mounted) {
+      setState(() {
+        _userRole = user.role;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -26,6 +50,13 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
   }
 
   Stream<List<EquipmentItem>> _getFilteredEquipment() {
+    if (_showMyItemsOnly) {
+      final currentUserId = _authService.currentUser?.uid;
+      if (currentUserId != null) {
+        return _equipmentService.getEquipmentByOwner(currentUserId);
+      }
+    }
+
     if (_showDonatedOnly) {
       return _equipmentService.getDonatedItems();
     } else if (_filterType != null) {
@@ -119,6 +150,18 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
                 onChanged: (value) =>
                     setState(() => _showDonatedOnly = value ?? false),
               ),
+
+              // My Items Only Checkbox
+              CheckboxListTile(
+                title: const Text(
+                  'My Items Only',
+                  style: TextStyle(color: Colors.white),
+                ),
+                value: _showMyItemsOnly,
+                activeColor: Colors.purple[400],
+                onChanged: (value) =>
+                    setState(() => _showMyItemsOnly = value ?? false),
+              ),
             ],
           ),
         ),
@@ -129,6 +172,7 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
                 _filterType = null;
                 _filterStatus = null;
                 _showDonatedOnly = false;
+                _showMyItemsOnly = false;
               });
               Navigator.pop(context);
             },
@@ -199,7 +243,10 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
           ),
 
           // Filter Chips
-          if (_filterType != null || _filterStatus != null || _showDonatedOnly)
+          if (_filterType != null ||
+              _filterStatus != null ||
+              _showDonatedOnly ||
+              _showMyItemsOnly)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Wrap(
@@ -219,6 +266,13 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
                     Chip(
                       label: const Text('Donated'),
                       onDeleted: () => setState(() => _showDonatedOnly = false),
+                    ),
+                  if (_showMyItemsOnly)
+                    Chip(
+                      label: const Text('My Items'),
+                      backgroundColor: Colors.purple[400]!.withOpacity(0.2),
+                      labelStyle: TextStyle(color: Colors.purple[400]),
+                      onDeleted: () => setState(() => _showMyItemsOnly = false),
                     ),
                 ],
               ),
@@ -293,6 +347,8 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
   }
 
   Widget _buildEquipmentCard(EquipmentItem item) {
+    final isAdmin = _userRole == UserRole.admin;
+
     return Card(
       color: Colors.grey[850],
       margin: const EdgeInsets.only(bottom: 16),
@@ -304,7 +360,7 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
             MaterialPageRoute(
               builder: (context) => EquipmentDetailScreen(item: item),
             ),
-          );
+          ).then((_) => setState(() {})); // Refresh list when returning
         },
         borderRadius: BorderRadius.circular(12),
         child: Padding(
@@ -375,8 +431,30 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
                 ),
               ),
 
-              // Arrow
-              Icon(Icons.arrow_forward_ios, color: Colors.grey[600], size: 16),
+              // Admin actions or arrow
+              if (isAdmin) ...[
+                IconButton(
+                  icon: Icon(Icons.edit, color: Colors.blue[400]),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            AddEditEquipmentScreen(item: item),
+                      ),
+                    ).then((_) => setState(() {})); // Refresh list
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.delete, color: Colors.red[400]),
+                  onPressed: () => _showDeleteConfirmation(item),
+                ),
+              ] else
+                Icon(
+                  Icons.arrow_forward_ios,
+                  color: Colors.grey[600],
+                  size: 16,
+                ),
             ],
           ),
         ),
@@ -440,5 +518,53 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
       case EquipmentType.other:
         return Icons.medical_services;
     }
+  }
+
+  void _showDeleteConfirmation(EquipmentItem item) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.grey[850],
+        title: const Text('Delete Item', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Are you sure you want to delete "${item.name}"? This action cannot be undone.',
+          style: TextStyle(color: Colors.grey[300]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await _equipmentService.deleteEquipment(item.id);
+                if (mounted) {
+                  Navigator.pop(dialogContext);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Item deleted successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                  setState(() {}); // Refresh list
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.pop(dialogContext);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error deleting item: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 }

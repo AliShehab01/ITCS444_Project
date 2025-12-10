@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../models/donation_submission.dart';
 import '../../models/equipment_item.dart';
 import '../../services/donation_service.dart';
@@ -58,6 +59,25 @@ class _DonationCard extends StatelessWidget {
 
   const _DonationCard({required this.donation});
 
+  // Map icon names to IconData
+  IconData _getIconFromName(String? iconName) {
+    final iconMap = {
+      'wheelchair': Icons.accessible,
+      'walker': Icons.elderly,
+      'crutches': Icons.assist_walker,
+      'hospital_bed': Icons.bed,
+      'oxygen': Icons.air,
+      'chair': Icons.chair,
+      'bath': Icons.bathtub,
+      'seat': Icons.event_seat,
+      'medical': Icons.medical_services,
+      'healing': Icons.healing,
+      'health': Icons.health_and_safety,
+      'medication': Icons.medication,
+    };
+    return iconMap[iconName] ?? Icons.volunteer_activism;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -76,8 +96,8 @@ class _DonationCard extends StatelessWidget {
                     color: Colors.orange[400],
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(
-                    Icons.volunteer_activism,
+                  child: Icon(
+                    _getIconFromName(donation.selectedIcon),
                     color: Colors.white,
                     size: 24,
                   ),
@@ -337,7 +357,10 @@ class _ApprovalDialogState extends State<_ApprovalDialog> {
             TextField(
               controller: _priceController,
               style: const TextStyle(color: Colors.white),
-              keyboardType: TextInputType.number,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
+              ],
               decoration: InputDecoration(
                 hintText: '0 for free',
                 hintStyle: TextStyle(color: Colors.grey[600]),
@@ -437,7 +460,9 @@ class _ApprovalDialogState extends State<_ApprovalDialog> {
                 .toList()
               ..add('donated'),
         status: ItemStatus.available,
-        rentalPricePerDay: double.tryParse(_priceController.text) ?? 0,
+        rentalPricePerDay: _priceController.text.isNotEmpty
+            ? double.tryParse(_priceController.text)
+            : null,
         ownerId: currentUser!.uid,
         ownerName: currentUser.name,
         createdAt: DateTime.now(),

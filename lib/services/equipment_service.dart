@@ -70,13 +70,14 @@ class EquipmentService {
     return _firestore
         .collection(_collection)
         .where('status', isEqualTo: ItemStatus.available.name)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final items = snapshot.docs
               .map((doc) => EquipmentItem.fromMap(doc.data()))
-              .toList(),
-        );
+              .toList();
+          items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return items;
+        });
   }
 
   // Get equipment by owner
@@ -84,13 +85,14 @@ class EquipmentService {
     return _firestore
         .collection(_collection)
         .where('ownerId', isEqualTo: ownerId)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final items = snapshot.docs
               .map((doc) => EquipmentItem.fromMap(doc.data()))
-              .toList(),
-        );
+              .toList();
+          items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return items;
+        });
   }
 
   // Search equipment
@@ -118,13 +120,14 @@ class EquipmentService {
     return _firestore
         .collection(_collection)
         .where('type', isEqualTo: type.name)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final items = snapshot.docs
               .map((doc) => EquipmentItem.fromMap(doc.data()))
-              .toList(),
-        );
+              .toList();
+          items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return items;
+        });
   }
 
   // Filter equipment by status
@@ -132,13 +135,14 @@ class EquipmentService {
     return _firestore
         .collection(_collection)
         .where('status', isEqualTo: status.name)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final items = snapshot.docs
               .map((doc) => EquipmentItem.fromMap(doc.data()))
-              .toList(),
-        );
+              .toList();
+          items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return items;
+        });
   }
 
   // Get donated items
@@ -146,13 +150,14 @@ class EquipmentService {
     return _firestore
         .collection(_collection)
         .where('isDonated', isEqualTo: true)
-        .orderBy('createdAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final items = snapshot.docs
               .map((doc) => EquipmentItem.fromMap(doc.data()))
-              .toList(),
-        );
+              .toList();
+          items.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+          return items;
+        });
   }
 
   // Update item status

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import '../profile_page.dart';
 import '../equipment/browse_equipment_screen.dart';
 import '../rental/rental_tracking_screen.dart';
+import '../donation/donation_submission_form.dart';
+import '../notifications/notifications_screen.dart';
 import '../../services/auth_service.dart';
+import '../../services/notification_service.dart';
 
 class RenterHome extends StatefulWidget {
   const RenterHome({super.key});
@@ -13,6 +16,7 @@ class RenterHome extends StatefulWidget {
 
 class _RenterHomeState extends State<RenterHome> {
   final _authService = AuthService();
+  final _notificationService = NotificationService();
   String? _userId;
   String? _userName;
 
@@ -40,6 +44,56 @@ class _RenterHomeState extends State<RenterHome> {
         backgroundColor: Colors.green[400],
         title: const Text('Renter Dashboard'),
         actions: [
+          // Notification Bell with Badge
+          if (_userId != null)
+            StreamBuilder<int>(
+              stream: _notificationService.getUnreadCount(_userId!),
+              builder: (context, snapshot) {
+                final unreadCount = snapshot.data ?? 0;
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => NotificationsScreen(
+                              userId: _userId!,
+                              isAdmin: false,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
+                          child: Text(
+                            unreadCount > 9 ? '9+' : unreadCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
@@ -168,14 +222,15 @@ class _RenterHomeState extends State<RenterHome> {
                 ),
                 _buildActionCard(
                   context,
-                  icon: Icons.pending,
-                  title: 'Pending',
-                  subtitle: 'Pending requests',
+                  icon: Icons.volunteer_activism,
+                  title: 'Donate',
+                  subtitle: 'Donate equipment',
                   color: Colors.orange[400]!,
                   onTap: () {
-                    // TODO: Navigate to pending requests
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Pending - Coming Soon')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const DonationSubmissionForm(),
+                      ),
                     );
                   },
                 ),

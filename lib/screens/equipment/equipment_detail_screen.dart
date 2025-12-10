@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import '../../models/equipment_item.dart';
 import '../../models/user_role.dart';
 import '../../services/auth_service.dart';
+import '../../services/equipment_service.dart';
 import '../rental/rental_request_form.dart';
+import 'add_edit_equipment_screen.dart';
 
 class EquipmentDetailScreen extends StatelessWidget {
   final EquipmentItem item;
@@ -12,12 +14,52 @@ class EquipmentDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authService = AuthService();
+    final equipmentService = EquipmentService();
 
     return Scaffold(
       backgroundColor: Colors.grey[900],
       appBar: AppBar(
         backgroundColor: Colors.grey[850],
         title: const Text('Equipment Details'),
+        actions: [
+          // Show edit/delete buttons for admins
+          FutureBuilder(
+            future: authService.getUserData(authService.currentUser!.uid),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const SizedBox.shrink();
+
+              final user = snapshot.data!;
+              final isAdmin = user.role == UserRole.admin;
+
+              if (!isAdmin) return const SizedBox.shrink();
+
+              return Row(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>
+                              AddEditEquipmentScreen(item: item),
+                        ),
+                      ).then((_) {
+                        // Refresh the screen when returning
+                        Navigator.pop(context);
+                      });
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    onPressed: () =>
+                        _showDeleteConfirmation(context, equipmentService),
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -195,9 +237,11 @@ class EquipmentDetailScreen extends StatelessWidget {
 
                       final user = snapshot.data!;
 
-                      // Show rent button only for renters and if available
+                      // Show rent button for renters if item is available or reserved
+                      // (reserved items may have available dates)
                       if (user.role == UserRole.renter &&
-                          item.status == ItemStatus.available) {
+                          (item.status == ItemStatus.available ||
+                              item.status == ItemStatus.reserved)) {
                         return ElevatedButton(
                           onPressed: () {
                             Navigator.push(
@@ -217,12 +261,21 @@ class EquipmentDetailScreen extends StatelessWidget {
                             ),
                             minimumSize: const Size(double.infinity, 50),
                           ),
-                          child: const Text(
-                            'Request Rental',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.calendar_today),
+                              const SizedBox(width: 8),
+                              Text(
+                                item.status == ItemStatus.reserved
+                                    ? 'Check Availability'
+                                    : 'Request Rental',
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           ),
                         );
                       }
@@ -327,5 +380,56 @@ class EquipmentDetailScreen extends StatelessWidget {
       case EquipmentType.other:
         return Icons.medical_services;
     }
+  }
+
+  void _showDeleteConfirmation(
+    BuildContext context,
+    EquipmentService equipmentService,
+  ) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: Colors.grey[850],
+        title: const Text('Delete Item', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Are you sure you want to delete "${item.name}"? This action cannot be undone.',
+          style: TextStyle(color: Colors.grey[300]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              try {
+                await equipmentService.deleteEquipment(item.id);
+                if (context.mounted) {
+                  Navigator.pop(dialogContext); // Close dialog
+                  Navigator.pop(context); // Close detail screen
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Item deleted successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.pop(dialogContext);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error deleting item: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -131,13 +131,76 @@ class RentalTrackingScreen extends StatelessWidget {
   }
 }
 
-class _RentalCard extends StatelessWidget {
+class _RentalCard extends StatefulWidget {
   final RentalRequest rental;
 
   const _RentalCard({required this.rental});
 
   @override
+  State<_RentalCard> createState() => _RentalCardState();
+}
+
+class _RentalCardState extends State<_RentalCard> {
+  final _rentalService = RentalService();
+  bool _isLoading = false;
+
+  Future<void> _returnItem() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[850],
+        title: const Text('Return Item', style: TextStyle(color: Colors.white)),
+        content: Text(
+          'Are you sure you want to return "${widget.rental.itemName}"?',
+          style: TextStyle(color: Colors.grey[300]),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green[400]),
+            child: const Text('Return'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      await _rentalService.returnItem(widget.rental.id, widget.rental.itemId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Item returned successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error returning item: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final rental = widget.rental;
     final isOverdue = rental.isOverdue;
     final daysRemaining = rental.daysRemaining;
 
@@ -176,11 +239,14 @@ class _RentalCard extends StatelessWidget {
               'Duration',
               '${rental.durationDays} days',
             ),
-            _buildInfoRow(
-              Icons.attach_money,
-              'Total Cost',
-              '\$${rental.totalCost?.toStringAsFixed(2) ?? '0.00'}',
-            ),
+            if (rental.totalCost != null && rental.totalCost! > 0)
+              _buildInfoRow(
+                Icons.attach_money,
+                'Total Cost',
+                '\$${rental.totalCost!.toStringAsFixed(2)}',
+              )
+            else
+              _buildInfoRow(Icons.attach_money, 'Total Cost', 'Free'),
 
             if (rental.status == RentalStatus.checkedOut) ...[
               const SizedBox(height: 12),
@@ -210,6 +276,32 @@ class _RentalCard extends StatelessWidget {
                       ),
                     ),
                   ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: _isLoading ? null : _returnItem,
+                  icon: _isLoading
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Colors.white,
+                          ),
+                        )
+                      : const Icon(Icons.assignment_return),
+                  label: Text(_isLoading ? 'Returning...' : 'Return Item'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green[400],
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                 ),
               ),
             ],

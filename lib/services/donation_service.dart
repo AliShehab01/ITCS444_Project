@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/donation_submission.dart';
 import '../models/equipment_item.dart';
+import 'notification_service.dart';
 
 class DonationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final String _collectionName = 'donations';
+  final NotificationService _notificationService = NotificationService();
 
   // Submit a new donation
   Future<String> submitDonation(DonationSubmission donation) async {
@@ -13,6 +15,14 @@ class DonationService {
           .collection(_collectionName)
           .doc(donation.id)
           .set(donation.toMap());
+
+      // Notify admins about new donation
+      await _notificationService.notifyNewDonation(
+        donation.donorName,
+        donation.itemName,
+        donation.id,
+      );
+
       return donation.id;
     } catch (e) {
       throw Exception('Failed to submit donation: $e');
@@ -37,13 +47,15 @@ class DonationService {
     return _firestore
         .collection(_collectionName)
         .where('status', isEqualTo: DonationStatus.pending.name)
-        .orderBy('submittedAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final donations = snapshot.docs
               .map((doc) => DonationSubmission.fromMap(doc.data()))
-              .toList(),
-        );
+              .toList();
+          // Sort in memory to avoid composite index requirement
+          donations.sort((a, b) => b.submittedAt.compareTo(a.submittedAt));
+          return donations;
+        });
   }
 
   // Get donations by donor
@@ -51,13 +63,15 @@ class DonationService {
     return _firestore
         .collection(_collectionName)
         .where('donorId', isEqualTo: donorId)
-        .orderBy('submittedAt', descending: true)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final donations = snapshot.docs
               .map((doc) => DonationSubmission.fromMap(doc.data()))
-              .toList(),
-        );
+              .toList();
+          // Sort in memory to avoid composite index requirement
+          donations.sort((a, b) => b.submittedAt.compareTo(a.submittedAt));
+          return donations;
+        });
   }
 
   // Get donation by ID
@@ -80,6 +94,10 @@ class DonationService {
     EquipmentItem equipment,
   ) async {
     try {
+      // Get the donation first for notification
+      final donationDoc = await _firestore.collection(_collectionName).doc(donationId).get();
+      final donation = DonationSubmission.fromMap(donationDoc.data()!);
+
       final batch = _firestore.batch();
 
       // Update donation status
@@ -96,6 +114,12 @@ class DonationService {
       );
 
       await batch.commit();
+
+      // Notify the donor
+      await _notificationService.notifyDonationApproved(
+        donation.donorId,
+        donation.itemName,
+      );
     } catch (e) {
       throw Exception('Failed to approve donation: $e');
     }
@@ -108,12 +132,23 @@ class DonationService {
     String reason,
   ) async {
     try {
+      // Get the donation first for notification
+      final donationDoc = await _firestore.collection(_collectionName).doc(donationId).get();
+      final donation = DonationSubmission.fromMap(donationDoc.data()!);
+
       await _firestore.collection(_collectionName).doc(donationId).update({
         'status': DonationStatus.rejected.name,
         'reviewedAt': Timestamp.now(),
         'reviewedBy': reviewerId,
         'rejectionReason': reason,
       });
+
+      // Notify the donor
+      await _notificationService.notifyDonationRejected(
+        donation.donorId,
+        donation.itemName,
+        reason,
+      );
     } catch (e) {
       throw Exception('Failed to reject donation: $e');
     }

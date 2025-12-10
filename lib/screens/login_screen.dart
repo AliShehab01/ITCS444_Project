@@ -74,7 +74,7 @@ class _LoginScreenState extends State<LoginScreen> {
     } catch (e) {
       // If anonymous auth fails (not enabled), just navigate to guest home
       if (mounted) {
-        if (e.toString().contains('anonymous') || 
+        if (e.toString().contains('anonymous') ||
             e.toString().contains('ADMIN_ONLY_OPERATION') ||
             e.toString().contains('not enabled')) {
           // Anonymous auth not enabled, navigate directly to guest home

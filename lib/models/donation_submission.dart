@@ -26,6 +26,7 @@ class DonationSubmission {
   final String description;
   final String condition;
   final List<String> imageUrls;
+  final String? selectedIcon;
   final int quantity;
   final String location;
   final DonationStatus status;
@@ -46,6 +47,7 @@ class DonationSubmission {
     required this.description,
     required this.condition,
     required this.imageUrls,
+    this.selectedIcon,
     required this.quantity,
     required this.location,
     required this.status,
@@ -68,6 +70,7 @@ class DonationSubmission {
       'description': description,
       'condition': condition,
       'imageUrls': imageUrls,
+      'selectedIcon': selectedIcon,
       'quantity': quantity,
       'location': location,
       'status': status.name,
@@ -91,6 +94,7 @@ class DonationSubmission {
       description: map['description'] ?? '',
       condition: map['condition'] ?? '',
       imageUrls: List<String>.from(map['imageUrls'] ?? []),
+      selectedIcon: map['selectedIcon'],
       quantity: map['quantity'] ?? 1,
       location: map['location'] ?? '',
       status: DonationStatus.values.firstWhere(
