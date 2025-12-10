@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../services/auth_service.dart';
 import '../models/user_model.dart';
 import '../models/user_role.dart';
@@ -17,7 +18,6 @@ class _ProfilePageState extends State<ProfilePage> {
 
   final _nameController = TextEditingController();
   final _contactController = TextEditingController();
-  final _idNumberController = TextEditingController();
 
   UserModel? _currentUser;
   bool _isLoading = true;
@@ -34,7 +34,6 @@ class _ProfilePageState extends State<ProfilePage> {
   void dispose() {
     _nameController.dispose();
     _contactController.dispose();
-    _idNumberController.dispose();
     super.dispose();
   }
 
@@ -52,7 +51,6 @@ class _ProfilePageState extends State<ProfilePage> {
             _currentUser = userData;
             _nameController.text = userData.name;
             _contactController.text = userData.contact;
-            _idNumberController.text = userData.idNumber;
             _preferredContactMethod = userData.preferredContactMethod;
           });
         }
@@ -86,7 +84,7 @@ class _ProfilePageState extends State<ProfilePage> {
           uid: _currentUser!.uid,
           name: _nameController.text.trim(),
           contact: _contactController.text.trim(),
-          idNumber: _idNumberController.text.trim(),
+          idNumber: '',
           preferredContactMethod: _preferredContactMethod,
         );
 
@@ -288,37 +286,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 validator: (value) {
-                  if (_isEditing && (value == null || value.isEmpty)) {
-                    return 'Please enter your contact number';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // ID Number Field
-              TextFormField(
-                controller: _idNumberController,
-                enabled: _isEditing,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'ID Number',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  prefixIcon: Icon(Icons.badge, color: Colors.grey[400]),
-                  filled: true,
-                  fillColor: _isEditing ? Colors.grey[800] : Colors.grey[850],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide(color: Colors.blue[400]!),
-                  ),
-                ),
-                validator: (value) {
-                  if (_isEditing && (value == null || value.isEmpty)) {
-                    return 'Please enter your ID number';
+                  if (_isEditing && 
+                      (_preferredContactMethod == 'phone' || _preferredContactMethod == 'sms') &&
+                      (value == null || value.isEmpty)) {
+                    return 'Contact number is required for phone/SMS contact';
                   }
                   return null;
                 },
@@ -448,7 +419,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       _isEditing = false;
                       _nameController.text = _currentUser?.name ?? '';
                       _contactController.text = _currentUser?.contact ?? '';
-                      _idNumberController.text = _currentUser?.idNumber ?? '';
                       _preferredContactMethod =
                           _currentUser?.preferredContactMethod ?? 'email';
                     });
@@ -490,7 +460,37 @@ class _ProfilePageState extends State<ProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildInfoRow('User ID', _currentUser?.uid ?? 'N/A'),
+                    InkWell(
+                      onTap: () async {
+                        await Clipboard.setData(
+                          ClipboardData(text: _currentUser?.uid ?? ''),
+                        );
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: const Text('User ID copied!'),
+                              backgroundColor: Colors.green,
+                              duration: const Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('User ID', style: TextStyle(color: Colors.grey[500])),
+                          Flexible(
+                            child: Text(
+                              _currentUser?.uid ?? 'N/A',
+                              style: const TextStyle(color: Colors.white),
+                              textAlign: TextAlign.right,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 8),
                     _buildInfoRow(
                       'Member Since',

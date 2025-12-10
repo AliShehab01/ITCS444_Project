@@ -19,15 +19,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  final _contactController = TextEditingController();
-  final _idNumberController = TextEditingController();
   final _authService = AuthService();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   UserRole _selectedRole = UserRole.renter;
-  String _preferredContactMethod = 'email';
 
   @override
   void dispose() {
@@ -35,8 +32,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    _contactController.dispose();
-    _idNumberController.dispose();
     super.dispose();
   }
 
@@ -51,9 +46,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           email: _emailController.text.trim(),
           password: _passwordController.text,
           name: _nameController.text.trim(),
-          contact: _contactController.text.trim(),
-          idNumber: _idNumberController.text.trim(),
-          preferredContactMethod: _preferredContactMethod,
+          contact: '',
+          idNumber: '',
+          preferredContactMethod: 'email',
           role: _selectedRole,
         );
 
@@ -271,63 +266,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Contact Field
-                TextFormField(
-                  controller: _contactController,
-                  keyboardType: TextInputType.phone,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: 'Contact Number',
-                    labelStyle: TextStyle(color: Colors.grey[400]),
-                    prefixIcon: Icon(Icons.phone, color: Colors.grey[400]),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.blue[400]!),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your contact number';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
-                // ID Number Field
-                TextFormField(
-                  controller: _idNumberController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    labelText: 'ID Number',
-                    labelStyle: TextStyle(color: Colors.grey[400]),
-                    prefixIcon: Icon(Icons.badge, color: Colors.grey[400]),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.blue[400]!),
-                    ),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your ID number';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-
                 // Role Selection
                 Container(
                   padding: const EdgeInsets.all(16),
@@ -339,96 +277,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Select Role',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                        'I want to',
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 16,
+                        ),
                       ),
                       const SizedBox(height: 8),
-                      ...UserRole.values.map((role) {
-                        // Don't show guest option in registration
-                        if (role == UserRole.guest)
-                          return const SizedBox.shrink();
-
-                        return RadioListTile<UserRole>(
-                          title: Text(
-                            role.displayName,
-                            style: const TextStyle(color: Colors.white),
+                      RadioListTile<UserRole>(
+                        title: const Text(
+                          'Rent Equipment',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          'Browse and rent items',
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 12,
                           ),
-                          value: role,
-                          groupValue: _selectedRole,
-                          activeColor: Colors.blue[400],
-                          onChanged: (UserRole? value) {
-                            if (value != null) {
-                              setState(() {
-                                _selectedRole = value;
-                              });
-                            }
-                          },
-                        );
-                      }).toList(),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Preferred Contact Method
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.grey[800],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Preferred Contact Method',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 16),
-                      ),
-                      const SizedBox(height: 8),
-                      RadioListTile<String>(
-                        title: const Text(
-                          'Email',
-                          style: TextStyle(color: Colors.white),
                         ),
-                        value: 'email',
-                        groupValue: _preferredContactMethod,
-                        activeColor: Colors.blue[400],
-                        onChanged: (String? value) {
+                        value: UserRole.renter,
+                        groupValue: _selectedRole,
+                        activeColor: Colors.green[400],
+                        onChanged: (UserRole? value) {
                           if (value != null) {
                             setState(() {
-                              _preferredContactMethod = value;
+                              _selectedRole = value;
                             });
                           }
                         },
                       ),
-                      RadioListTile<String>(
+                      RadioListTile<UserRole>(
                         title: const Text(
-                          'Phone',
+                          'Donate Equipment',
                           style: TextStyle(color: Colors.white),
                         ),
-                        value: 'phone',
-                        groupValue: _preferredContactMethod,
-                        activeColor: Colors.blue[400],
-                        onChanged: (String? value) {
-                          if (value != null) {
-                            setState(() {
-                              _preferredContactMethod = value;
-                            });
-                          }
-                        },
-                      ),
-                      RadioListTile<String>(
-                        title: const Text(
-                          'SMS',
-                          style: TextStyle(color: Colors.white),
+                        subtitle: Text(
+                          'Donate and manage items',
+                          style: TextStyle(
+                            color: Colors.grey[500],
+                            fontSize: 12,
+                          ),
                         ),
-                        value: 'sms',
-                        groupValue: _preferredContactMethod,
-                        activeColor: Colors.blue[400],
-                        onChanged: (String? value) {
+                        value: UserRole.admin,
+                        groupValue: _selectedRole,
+                        activeColor: Colors.purple[400],
+                        onChanged: (UserRole? value) {
                           if (value != null) {
                             setState(() {
-                              _preferredContactMethod = value;
+                              _selectedRole = value;
                             });
                           }
                         },

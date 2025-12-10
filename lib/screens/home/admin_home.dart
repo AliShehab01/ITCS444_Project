@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import '../profile_page.dart';
+import '../equipment/add_edit_equipment_screen.dart';
+import '../equipment/browse_equipment_screen.dart';
+import '../rental/admin_rental_list.dart';
+import '../donation/admin_donation_review.dart';
 
 class AdminHome extends StatelessWidget {
   const AdminHome({super.key});
@@ -99,9 +103,10 @@ class AdminHome extends StatelessWidget {
                   subtitle: 'Donate new items',
                   color: Colors.green[400]!,
                   onTap: () {
-                    // TODO: Navigate to add item screen
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Add Item - Coming Soon')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AddEditEquipmentScreen(),
+                      ),
                     );
                   },
                 ),
@@ -112,9 +117,10 @@ class AdminHome extends StatelessWidget {
                   subtitle: 'Manage donations',
                   color: Colors.blue[400]!,
                   onTap: () {
-                    // TODO: Navigate to items list
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('My Items - Coming Soon')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const BrowseEquipmentScreen(),
+                      ),
                     );
                   },
                 ),
@@ -125,24 +131,24 @@ class AdminHome extends StatelessWidget {
                   subtitle: 'View pending requests',
                   color: Colors.orange[400]!,
                   onTap: () {
-                    // TODO: Navigate to rental requests
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Rental Requests - Coming Soon'),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AdminRentalList(),
                       ),
                     );
                   },
                 ),
                 _buildActionCard(
                   context,
-                  icon: Icons.analytics,
-                  title: 'Analytics',
-                  subtitle: 'View statistics',
-                  color: Colors.teal[400]!,
+                  icon: Icons.volunteer_activism,
+                  title: 'Donations',
+                  subtitle: 'Review submissions',
+                  color: Colors.orange[400]!,
                   onTap: () {
-                    // TODO: Navigate to analytics
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Analytics - Coming Soon')),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const AdminDonationReview(),
+                      ),
                     );
                   },
                 ),

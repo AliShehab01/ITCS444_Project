@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../login_screen.dart';
+import '../equipment/browse_equipment_screen.dart';
+import '../donation/donation_submission_form.dart';
 
 class GuestHome extends StatelessWidget {
   const GuestHome({super.key});
@@ -143,9 +145,10 @@ class GuestHome extends StatelessWidget {
               color: Colors.grey[850],
               child: InkWell(
                 onTap: () {
-                  // TODO: Navigate to browse items
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Browse Items - Coming Soon')),
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const BrowseEquipmentScreen(),
+                    ),
                   );
                 },
                 borderRadius: BorderRadius.circular(12),
@@ -170,6 +173,59 @@ class GuestHome extends StatelessWidget {
                             const SizedBox(height: 4),
                             Text(
                               'View all items available for rent',
+                              style: TextStyle(
+                                color: Colors.grey[400],
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Icon(Icons.arrow_forward_ios, color: Colors.grey[400]),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Donate Card
+            Card(
+              color: Colors.grey[850],
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (context) => const DonationSubmissionForm(),
+                    ),
+                  );
+                },
+                borderRadius: BorderRadius.circular(12),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.volunteer_activism,
+                        size: 48,
+                        color: Colors.orange[400],
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Donate Equipment',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Submit equipment you\'d like to donate',
                               style: TextStyle(
                                 color: Colors.grey[400],
                                 fontSize: 14,

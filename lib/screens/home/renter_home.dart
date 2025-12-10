@@ -1,8 +1,36 @@
 import 'package:flutter/material.dart';
 import '../profile_page.dart';
+import '../equipment/browse_equipment_screen.dart';
+import '../rental/rental_tracking_screen.dart';
+import '../../services/auth_service.dart';
 
-class RenterHome extends StatelessWidget {
+class RenterHome extends StatefulWidget {
   const RenterHome({super.key});
+
+  @override
+  State<RenterHome> createState() => _RenterHomeState();
+}
+
+class _RenterHomeState extends State<RenterHome> {
+  final _authService = AuthService();
+  String? _userId;
+  String? _userName;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUserData();
+  }
+
+  Future<void> _loadUserData() async {
+    final user = await _authService.getUserData(_authService.currentUser!.uid);
+    if (user != null && mounted) {
+      setState(() {
+        _userId = user.uid;
+        _userName = user.name;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -112,10 +140,9 @@ class RenterHome extends StatelessWidget {
                   subtitle: 'View available items',
                   color: Colors.blue[400]!,
                   onTap: () {
-                    // TODO: Navigate to browse items
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Browse Items - Coming Soon'),
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const BrowseEquipmentScreen(),
                       ),
                     );
                   },
@@ -127,10 +154,16 @@ class RenterHome extends StatelessWidget {
                   subtitle: 'View rental history',
                   color: Colors.purple[400]!,
                   onTap: () {
-                    // TODO: Navigate to rental history
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('My Rentals - Coming Soon')),
-                    );
+                    if (_userId != null && _userName != null) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => RentalTrackingScreen(
+                            renterId: _userId!,
+                            renterName: _userName!,
+                          ),
+                        ),
+                      );
+                    }
                   },
                 ),
                 _buildActionCard(

@@ -66,15 +66,30 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
+      // Try anonymous auth first
       await _authService.continueAsGuest();
       if (mounted) {
         _navigateToHome(UserRole.guest);
       }
     } catch (e) {
+      // If anonymous auth fails (not enabled), just navigate to guest home
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString()), backgroundColor: Colors.red),
-        );
+        if (e.toString().contains('anonymous') || 
+            e.toString().contains('ADMIN_ONLY_OPERATION') ||
+            e.toString().contains('not enabled')) {
+          // Anonymous auth not enabled, navigate directly to guest home
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(builder: (context) => const GuestHome()),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: ${e.toString()}'),
+              backgroundColor: Colors.red,
+              duration: const Duration(seconds: 5),
+            ),
+          );
+        }
       }
     } finally {
       if (mounted) {
