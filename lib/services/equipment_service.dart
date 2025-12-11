@@ -192,4 +192,28 @@ class EquipmentService {
       throw 'Error getting equipment counts: ${e.toString()}';
     }
   }
+
+  // Stream for total equipment count (real-time)
+  Stream<int> getTotalEquipmentCountStream() {
+    return _firestore.collection(_collection).snapshots().map((snapshot) {
+      return snapshot.docs.length;
+    });
+  }
+
+  // Stream for equipment stats (real-time)
+  Stream<Map<String, int>> getEquipmentStatsStream() {
+    return _firestore.collection(_collection).snapshots().map((snapshot) {
+      final items = snapshot.docs
+          .map((doc) => EquipmentItem.fromMap(doc.data()))
+          .toList();
+
+      return {
+        'total': items.length,
+        'available': items.where((i) => i.status == ItemStatus.available).length,
+        'rented': items.where((i) => i.status == ItemStatus.rented).length,
+        'reserved': items.where((i) => i.status == ItemStatus.reserved).length,
+        'underMaintenance': items.where((i) => i.status == ItemStatus.underMaintenance).length,
+      };
+    });
+  }
 }

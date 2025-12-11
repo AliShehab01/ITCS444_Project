@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../models/equipment_item.dart';
 import '../../services/equipment_service.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/location_picker.dart';
 
 class AddEditEquipmentScreen extends StatefulWidget {
   final EquipmentItem? item;
@@ -280,22 +281,12 @@ class _AddEditEquipmentScreenState extends State<AddEditEquipmentScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Location Field
-              TextFormField(
+              // Location Field with Map Picker
+              LocationPickerField(
                 controller: _locationController,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Location *',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  filled: true,
-                  fillColor: Colors.grey[800],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+                labelText: 'Location *',
                 validator: (value) =>
-                    value?.isEmpty ?? true ? 'Please enter location' : null,
+                    value?.isEmpty ?? true ? 'Please select a location' : null,
               ),
               const SizedBox(height: 16),
 
@@ -303,7 +294,9 @@ class _AddEditEquipmentScreenState extends State<AddEditEquipmentScreen> {
               TextFormField(
                 controller: _rentalPriceController,
                 style: const TextStyle(color: Colors.white),
-                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                keyboardType: const TextInputType.numberWithOptions(
+                  decimal: true,
+                ),
                 inputFormatters: [
                   FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
                 ],
@@ -339,36 +332,38 @@ class _AddEditEquipmentScreenState extends State<AddEditEquipmentScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Status Dropdown
-              DropdownButtonFormField<ItemStatus>(
-                value: _selectedStatus,
-                dropdownColor: Colors.grey[800],
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'Status *',
-                  labelStyle: TextStyle(color: Colors.grey[400]),
-                  filled: true,
-                  fillColor: Colors.grey[800],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
+              // Status Dropdown - Only show when editing
+              if (widget.item != null) ...[
+                DropdownButtonFormField<ItemStatus>(
+                  value: _selectedStatus,
+                  dropdownColor: Colors.grey[800],
+                  style: const TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'Status *',
+                    labelStyle: TextStyle(color: Colors.grey[400]),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide.none,
+                    ),
                   ),
+                  items: ItemStatus.values.map((status) {
+                    return DropdownMenuItem(
+                      value: status,
+                      child: Text(status.displayName),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() {
+                        _selectedStatus = value;
+                      });
+                    }
+                  },
                 ),
-                items: ItemStatus.values.map((status) {
-                  return DropdownMenuItem(
-                    value: status,
-                    child: Text(status.displayName),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() {
-                      _selectedStatus = value;
-                    });
-                  }
-                },
-              ),
-              const SizedBox(height: 16),
+                const SizedBox(height: 16),
+              ],
 
               // Is Donated Checkbox
               Container(

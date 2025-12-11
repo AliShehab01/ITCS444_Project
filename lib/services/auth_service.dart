@@ -25,7 +25,30 @@ class AuthService {
       );
 
       if (result.user != null) {
-        return await getUserData(result.user!.uid);
+        UserModel? userData = await getUserData(result.user!.uid);
+
+        // If user exists in Auth but not in Firestore, recreate the document
+        if (userData == null) {
+          UserModel newUser = UserModel(
+            uid: result.user!.uid,
+            email: email,
+            name: result.user!.displayName ?? email.split('@')[0],
+            contact: '',
+            idNumber: '',
+            preferredContactMethod: 'email',
+            role: UserRole.renter,
+            createdAt: DateTime.now(),
+          );
+
+          await _firestore
+              .collection('users')
+              .doc(result.user!.uid)
+              .set(newUser.toMap());
+
+          return newUser;
+        }
+
+        return userData;
       }
       return null;
     } on FirebaseAuthException catch (e) {

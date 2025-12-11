@@ -7,4 +7,5 @@ class EnvConfig {
   static String get firebaseMessagingSenderId =>
       dotenv.env['FIREBASE_MESSAGING_SENDER_ID'] ?? '';
   static String get firebaseAppId => dotenv.env['FIREBASE_APP_ID'] ?? '';
+  static String get googleMapsApiKey => dotenv.env['GOOGLE_MAPS_API_KEY'] ?? '';
 }

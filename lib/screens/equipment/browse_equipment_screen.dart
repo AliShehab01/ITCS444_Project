@@ -35,7 +35,9 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
   }
 
   Future<void> _loadUserRole() async {
-    final user = await _authService.getUserData(_authService.currentUser?.uid ?? '');
+    final user = await _authService.getUserData(
+      _authService.currentUser?.uid ?? '',
+    );
     if (user != null && mounted) {
       setState(() {
         _userRole = user.role;

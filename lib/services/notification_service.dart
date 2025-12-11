@@ -139,132 +139,172 @@ class NotificationService {
 
   // Notify user when rental is approved
   Future<void> notifyRentalApproved(RentalRequest rental) async {
-    await createNotification(AppNotification(
-      id: '',
-      userId: rental.renterId,
-      type: NotificationType.rentalApproved,
-      title: 'Rental Approved!',
-      message: 'Your rental request for "${rental.itemName}" has been approved. Please pick it up on ${_formatDate(rental.startDate)}.',
-      relatedId: rental.id,
-      createdAt: DateTime.now(),
-    ));
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: rental.renterId,
+        type: NotificationType.rentalApproved,
+        title: 'Rental Approved!',
+        message:
+            'Your rental request for "${rental.itemName}" has been approved. Please pick it up on ${_formatDate(rental.startDate)}.',
+        relatedId: rental.id,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Notify user when rental is rejected
-  Future<void> notifyRentalRejected(RentalRequest rental, String? reason) async {
-    await createNotification(AppNotification(
-      id: '',
-      userId: rental.renterId,
-      type: NotificationType.rentalRejected,
-      title: 'Rental Rejected',
-      message: 'Your rental request for "${rental.itemName}" was rejected.${reason != null ? ' Reason: $reason' : ''}',
-      relatedId: rental.id,
-      createdAt: DateTime.now(),
-    ));
+  Future<void> notifyRentalRejected(
+    RentalRequest rental,
+    String? reason,
+  ) async {
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: rental.renterId,
+        type: NotificationType.rentalRejected,
+        title: 'Rental Rejected',
+        message:
+            'Your rental request for "${rental.itemName}" was rejected.${reason != null ? ' Reason: $reason' : ''}',
+        relatedId: rental.id,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Notify admins about new rental request
   Future<void> notifyNewRentalRequest(RentalRequest rental) async {
-    await createNotification(AppNotification(
-      id: '',
-      userId: 'admin',
-      type: NotificationType.newRentalRequest,
-      title: 'New Rental Request',
-      message: '${rental.renterName} requested to rent "${rental.itemName}" from ${_formatDate(rental.startDate)} to ${_formatDate(rental.endDate)}.',
-      relatedId: rental.id,
-      createdAt: DateTime.now(),
-    ));
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: 'admin',
+        type: NotificationType.newRentalRequest,
+        title: 'New Rental Request',
+        message:
+            '${rental.renterName} requested to rent "${rental.itemName}" from ${_formatDate(rental.startDate)} to ${_formatDate(rental.endDate)}.',
+        relatedId: rental.id,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Notify user when return date is approaching (3 days before)
   Future<void> notifyReturnApproaching(RentalRequest rental) async {
     final daysLeft = rental.endDate.difference(DateTime.now()).inDays;
-    await createNotification(AppNotification(
-      id: '',
-      userId: rental.renterId,
-      type: NotificationType.rentalApproaching,
-      title: 'Return Date Approaching',
-      message: 'Your rental of "${rental.itemName}" is due in $daysLeft days (${_formatDate(rental.endDate)}). Please return it on time.',
-      relatedId: rental.id,
-      createdAt: DateTime.now(),
-    ));
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: rental.renterId,
+        type: NotificationType.rentalApproaching,
+        title: 'Return Date Approaching',
+        message:
+            'Your rental of "${rental.itemName}" is due in $daysLeft days (${_formatDate(rental.endDate)}). Please return it on time.',
+        relatedId: rental.id,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Notify user and admin when rental is overdue
   Future<void> notifyRentalOverdue(RentalRequest rental) async {
     final daysOverdue = DateTime.now().difference(rental.endDate).inDays;
-    
+
     // Notify user
-    await createNotification(AppNotification(
-      id: '',
-      userId: rental.renterId,
-      type: NotificationType.rentalOverdue,
-      title: 'Rental Overdue!',
-      message: 'Your rental of "${rental.itemName}" is $daysOverdue day(s) overdue. Please return it immediately.',
-      relatedId: rental.id,
-      createdAt: DateTime.now(),
-    ));
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: rental.renterId,
+        type: NotificationType.rentalOverdue,
+        title: 'Rental Overdue!',
+        message:
+            'Your rental of "${rental.itemName}" is $daysOverdue day(s) overdue. Please return it immediately.',
+        relatedId: rental.id,
+        createdAt: DateTime.now(),
+      ),
+    );
 
     // Notify admins
-    await createNotification(AppNotification(
-      id: '',
-      userId: 'admin',
-      type: NotificationType.rentalOverdue,
-      title: 'Overdue Rental Alert',
-      message: '${rental.renterName}\'s rental of "${rental.itemName}" is $daysOverdue day(s) overdue.',
-      relatedId: rental.id,
-      createdAt: DateTime.now(),
-    ));
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: 'admin',
+        type: NotificationType.rentalOverdue,
+        title: 'Overdue Rental Alert',
+        message:
+            '${rental.renterName}\'s rental of "${rental.itemName}" is $daysOverdue day(s) overdue.',
+        relatedId: rental.id,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Notify admins about new donation submission
-  Future<void> notifyNewDonation(String donorName, String itemName, String donationId) async {
-    await createNotification(AppNotification(
-      id: '',
-      userId: 'admin',
-      type: NotificationType.newDonation,
-      title: 'New Donation Submitted',
-      message: '$donorName has submitted a donation: "$itemName". Please review.',
-      relatedId: donationId,
-      createdAt: DateTime.now(),
-    ));
+  Future<void> notifyNewDonation(
+    String donorName,
+    String itemName,
+    String donationId,
+  ) async {
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: 'admin',
+        type: NotificationType.newDonation,
+        title: 'New Donation Submitted',
+        message:
+            '$donorName has submitted a donation: "$itemName". Please review.',
+        relatedId: donationId,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Notify donor when donation is approved
   Future<void> notifyDonationApproved(String donorId, String itemName) async {
-    await createNotification(AppNotification(
-      id: '',
-      userId: donorId,
-      type: NotificationType.donationApproved,
-      title: 'Donation Approved!',
-      message: 'Your donation "$itemName" has been approved and added to the inventory. Thank you for your generosity!',
-      createdAt: DateTime.now(),
-    ));
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: donorId,
+        type: NotificationType.donationApproved,
+        title: 'Donation Approved!',
+        message:
+            'Your donation "$itemName" has been approved and added to the inventory. Thank you for your generosity!',
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Notify donor when donation is rejected
-  Future<void> notifyDonationRejected(String donorId, String itemName, String? reason) async {
-    await createNotification(AppNotification(
-      id: '',
-      userId: donorId,
-      type: NotificationType.donationRejected,
-      title: 'Donation Not Accepted',
-      message: 'Unfortunately, your donation "$itemName" could not be accepted.${reason != null ? ' Reason: $reason' : ''}',
-      createdAt: DateTime.now(),
-    ));
+  Future<void> notifyDonationRejected(
+    String donorId,
+    String itemName,
+    String? reason,
+  ) async {
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: donorId,
+        type: NotificationType.donationRejected,
+        title: 'Donation Not Accepted',
+        message:
+            'Unfortunately, your donation "$itemName" could not be accepted.${reason != null ? ' Reason: $reason' : ''}',
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Notify admins about equipment requiring maintenance
   Future<void> notifyMaintenanceRequired(String itemName, String itemId) async {
-    await createNotification(AppNotification(
-      id: '',
-      userId: 'admin',
-      type: NotificationType.maintenanceRequired,
-      title: 'Maintenance Required',
-      message: '"$itemName" has been marked as requiring maintenance.',
-      relatedId: itemId,
-      createdAt: DateTime.now(),
-    ));
+    await createNotification(
+      AppNotification(
+        id: '',
+        userId: 'admin',
+        type: NotificationType.maintenanceRequired,
+        title: 'Maintenance Required',
+        message: '"$itemName" has been marked as requiring maintenance.',
+        relatedId: itemId,
+        createdAt: DateTime.now(),
+      ),
+    );
   }
 
   // Check and create notifications for approaching/overdue rentals

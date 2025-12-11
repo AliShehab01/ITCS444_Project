@@ -4,6 +4,7 @@ import '../../models/donation_submission.dart';
 import '../../models/equipment_item.dart';
 import '../../services/donation_service.dart';
 import '../../services/auth_service.dart';
+import '../../widgets/location_picker.dart';
 
 class DonationSubmissionForm extends StatefulWidget {
   const DonationSubmissionForm({super.key});
@@ -426,7 +427,9 @@ class _DonationSubmissionFormState extends State<DonationSubmissionForm> {
                           controller: _quantityController,
                           style: const TextStyle(color: Colors.white),
                           keyboardType: TextInputType.number,
-                          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                          inputFormatters: [
+                            FilteringTextInputFormatter.digitsOnly,
+                          ],
                           decoration: InputDecoration(
                             filled: true,
                             fillColor: Colors.grey[850],
@@ -463,23 +466,9 @@ class _DonationSubmissionFormState extends State<DonationSubmissionForm> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        TextFormField(
+                        LocationPickerField(
                           controller: _locationController,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'City, Area',
-                            hintStyle: TextStyle(color: Colors.grey[600]),
-                            filled: true,
-                            fillColor: Colors.grey[850],
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
-                            ),
-                            prefixIcon: Icon(
-                              Icons.location_on,
-                              color: Colors.grey[400],
-                            ),
-                          ),
+                          labelText: 'Select Location',
                           validator: (value) =>
                               value?.isEmpty ?? true ? 'Required' : null,
                         ),

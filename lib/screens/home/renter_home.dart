@@ -6,6 +6,7 @@ import '../donation/donation_submission_form.dart';
 import '../notifications/notifications_screen.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/rental_service.dart';
 
 class RenterHome extends StatefulWidget {
   const RenterHome({super.key});
@@ -17,6 +18,7 @@ class RenterHome extends StatefulWidget {
 class _RenterHomeState extends State<RenterHome> {
   final _authService = AuthService();
   final _notificationService = NotificationService();
+  final _rentalService = RentalService();
   String? _userId;
   String? _userName;
 
@@ -262,28 +264,59 @@ class _RenterHomeState extends State<RenterHome> {
             ),
             const SizedBox(height: 16),
 
-            // Stats Cards
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    'Active Rentals',
-                    '0',
-                    Icons.schedule,
-                    Colors.green[400]!,
+            // Stats Cards with real data
+            if (_userId != null)
+              StreamBuilder<Map<String, int>>(
+                stream: _rentalService.getUserRentalStatsStream(_userId!),
+                builder: (context, snapshot) {
+                  final activeRentals = snapshot.data?['active'] ?? 0;
+                  final completed = snapshot.data?['completed'] ?? 0;
+
+                  return Row(
+                    children: [
+                      Expanded(
+                        child: _buildStatCard(
+                          'Active Rentals',
+                          activeRentals.toString(),
+                          Icons.schedule,
+                          Colors.green[400]!,
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: _buildStatCard(
+                          'Completed',
+                          completed.toString(),
+                          Icons.check_circle,
+                          Colors.blue[400]!,
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              )
+            else
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildStatCard(
+                      'Active Rentals',
+                      '0',
+                      Icons.schedule,
+                      Colors.green[400]!,
+                    ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatCard(
-                    'Completed',
-                    '0',
-                    Icons.check_circle,
-                    Colors.blue[400]!,
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: _buildStatCard(
+                      'Completed',
+                      '0',
+                      Icons.check_circle,
+                      Colors.blue[400]!,
+                    ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              ),
           ],
         ),
       ),

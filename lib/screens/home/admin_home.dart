@@ -5,7 +5,10 @@ import '../equipment/browse_equipment_screen.dart';
 import '../rental/admin_rental_list.dart';
 import '../donation/admin_donation_review.dart';
 import '../notifications/notifications_screen.dart';
+import '../reports/reports_dashboard.dart';
 import '../../services/notification_service.dart';
+import '../../services/equipment_service.dart';
+import '../../services/rental_service.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -16,6 +19,8 @@ class AdminHome extends StatefulWidget {
 
 class _AdminHomeState extends State<AdminHome> {
   final _notificationService = NotificationService();
+  final _equipmentService = EquipmentService();
+  final _rentalService = RentalService();
 
   @override
   void initState() {
@@ -218,6 +223,34 @@ class _AdminHomeState extends State<AdminHome> {
                     );
                   },
                 ),
+                _buildActionCard(
+                  context,
+                  icon: Icons.analytics,
+                  title: 'Reports',
+                  subtitle: 'View analytics',
+                  color: Colors.purple[400]!,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const ReportsDashboard(),
+                      ),
+                    );
+                  },
+                ),
+                _buildActionCard(
+                  context,
+                  icon: Icons.search,
+                  title: 'Browse All',
+                  subtitle: 'Search inventory',
+                  color: Colors.teal[400]!,
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => const BrowseEquipmentScreen(),
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
             const SizedBox(height: 24),
@@ -233,27 +266,67 @@ class _AdminHomeState extends State<AdminHome> {
             ),
             const SizedBox(height: 16),
 
-            // Stats Cards
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatCard(
-                    'Total Items',
-                    '0',
-                    Icons.inventory_2,
-                    Colors.blue[400]!,
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: _buildStatCard(
-                    'Active Rentals',
-                    '0',
-                    Icons.schedule,
-                    Colors.green[400]!,
-                  ),
-                ),
-              ],
+            // Stats Cards with real data
+            StreamBuilder<Map<String, int>>(
+              stream: _equipmentService.getEquipmentStatsStream(),
+              builder: (context, equipmentSnapshot) {
+                return StreamBuilder<Map<String, int>>(
+                  stream: _rentalService.getRentalStatisticsStream(),
+                  builder: (context, rentalSnapshot) {
+                    final totalItems = equipmentSnapshot.data?['total'] ?? 0;
+                    final activeRentals = rentalSnapshot.data?['active'] ?? 0;
+                    final pendingRequests = rentalSnapshot.data?['pending'] ?? 0;
+
+                    return Column(
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                'Total Items',
+                                totalItems.toString(),
+                                Icons.inventory_2,
+                                Colors.blue[400]!,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildStatCard(
+                                'Active Rentals',
+                                activeRentals.toString(),
+                                Icons.schedule,
+                                Colors.green[400]!,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                'Pending Requests',
+                                pendingRequests.toString(),
+                                Icons.pending_actions,
+                                Colors.orange[400]!,
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: _buildStatCard(
+                                'Completed',
+                                (rentalSnapshot.data?['completed'] ?? 0).toString(),
+                                Icons.check_circle,
+                                Colors.purple[400]!,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),

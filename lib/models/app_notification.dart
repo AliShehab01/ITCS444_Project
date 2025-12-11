@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum NotificationType {
-  rentalApproaching,    // Return date approaching (3 days before)
-  rentalOverdue,        // Rental is overdue
-  rentalApproved,       // Rental request approved
-  rentalRejected,       // Rental request rejected
-  newDonation,          // New donation submitted (for admins)
-  donationApproved,     // Donation approved (for donor)
-  donationRejected,     // Donation rejected (for donor)
-  maintenanceRequired,  // Equipment needs maintenance (for admins)
-  newRentalRequest,     // New rental request (for admins)
+  rentalApproaching, // Return date approaching (3 days before)
+  rentalOverdue, // Rental is overdue
+  rentalApproved, // Rental request approved
+  rentalRejected, // Rental request rejected
+  newDonation, // New donation submitted (for admins)
+  donationApproved, // Donation approved (for donor)
+  donationRejected, // Donation rejected (for donor)
+  maintenanceRequired, // Equipment needs maintenance (for admins)
+  newRentalRequest, // New rental request (for admins)
 }
 
 extension NotificationTypeExtension on NotificationType {
@@ -62,11 +62,11 @@ extension NotificationTypeExtension on NotificationType {
 
 class AppNotification {
   final String id;
-  final String userId;          // Target user (or 'admin' for all admins)
+  final String userId; // Target user (or 'admin' for all admins)
   final NotificationType type;
   final String title;
   final String message;
-  final String? relatedId;      // Related rental/donation/equipment ID
+  final String? relatedId; // Related rental/donation/equipment ID
   final bool isRead;
   final DateTime createdAt;
 

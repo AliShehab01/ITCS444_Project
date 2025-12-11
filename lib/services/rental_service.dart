@@ -111,15 +111,18 @@ class RentalService {
       await _equipmentService.updateItemStatus(itemId, ItemStatus.rented);
 
       // Notify the renter about pickup
-      await _notificationService.createNotification(AppNotification(
-        id: '',
-        userId: rental.renterId,
-        type: NotificationType.rentalApproved,
-        title: 'Item Checked Out',
-        message: 'You have picked up "${rental.itemName}". Please return it by ${_formatDate(rental.endDate)}.',
-        relatedId: rental.id,
-        createdAt: DateTime.now(),
-      ));
+      await _notificationService.createNotification(
+        AppNotification(
+          id: '',
+          userId: rental.renterId,
+          type: NotificationType.rentalApproved,
+          title: 'Item Checked Out',
+          message:
+              'You have picked up "${rental.itemName}". Please return it by ${_formatDate(rental.endDate)}.',
+          relatedId: rental.id,
+          createdAt: DateTime.now(),
+        ),
+      );
     } catch (e) {
       throw 'Error checking out item: ${e.toString()}';
     }
@@ -141,15 +144,18 @@ class RentalService {
       await _equipmentService.updateItemStatus(itemId, ItemStatus.available);
 
       // Notify the renter about successful return
-      await _notificationService.createNotification(AppNotification(
-        id: '',
-        userId: rental.renterId,
-        type: NotificationType.rentalApproved,
-        title: 'Item Returned',
-        message: 'You have successfully returned "${rental.itemName}". Thank you for using Complete Care Center!',
-        relatedId: rental.id,
-        createdAt: DateTime.now(),
-      ));
+      await _notificationService.createNotification(
+        AppNotification(
+          id: '',
+          userId: rental.renterId,
+          type: NotificationType.rentalApproved,
+          title: 'Item Returned',
+          message:
+              'You have successfully returned "${rental.itemName}". Thank you for using Complete Care Center!',
+          relatedId: rental.id,
+          createdAt: DateTime.now(),
+        ),
+      );
     } catch (e) {
       throw 'Error returning item: ${e.toString()}';
     }
@@ -216,6 +222,20 @@ class RentalService {
           rentals.sort((a, b) => b.createdAt.compareTo(a.createdAt));
           return rentals;
         });
+  }
+
+  // Get approved and active rentals (approved + checked out)
+  Stream<List<RentalRequest>> getApprovedAndActiveRentals() {
+    return _firestore.collection(_collection).snapshots().map((snapshot) {
+      final rentals = snapshot.docs
+          .map((doc) => RentalRequest.fromMap(doc.data()))
+          .where((r) =>
+              r.status == RentalStatus.approved ||
+              r.status == RentalStatus.checkedOut)
+          .toList();
+      rentals.sort((a, b) => b.createdAt.compareTo(a.createdAt));
+      return rentals;
+    });
   }
 
   // Get overdue rentals
@@ -304,6 +324,49 @@ class RentalService {
     } catch (e) {
       throw 'Error getting rental statistics: ${e.toString()}';
     }
+  }
+
+  // Stream for rental statistics (real-time updates)
+  Stream<Map<String, int>> getRentalStatisticsStream() {
+    return _firestore.collection(_collection).snapshots().map((snapshot) {
+      final rentals = snapshot.docs
+          .map((doc) => RentalRequest.fromMap(doc.data()))
+          .toList();
+
+      final now = DateTime.now();
+      return {
+        'total': rentals.length,
+        'active': rentals.where((r) => r.status == RentalStatus.checkedOut).length,
+        'pending': rentals.where((r) => r.status == RentalStatus.pending).length,
+        'completed': rentals.where((r) => r.status == RentalStatus.returned).length,
+        'overdue': rentals
+            .where((r) => r.status == RentalStatus.checkedOut && r.endDate.isBefore(now))
+            .length,
+      };
+    });
+  }
+
+  // Stream for user-specific rental statistics
+  Stream<Map<String, int>> getUserRentalStatsStream(String userId) {
+    return _firestore
+        .collection(_collection)
+        .where('renterId', isEqualTo: userId)
+        .snapshots()
+        .map((snapshot) {
+      final rentals = snapshot.docs
+          .map((doc) => RentalRequest.fromMap(doc.data()))
+          .toList();
+
+      return {
+        'active': rentals
+            .where((r) =>
+                r.status == RentalStatus.checkedOut ||
+                r.status == RentalStatus.approved ||
+                r.status == RentalStatus.pending)
+            .length,
+        'completed': rentals.where((r) => r.status == RentalStatus.returned).length,
+      };
+    });
   }
 
   // Get reserved date ranges for an item
@@ -431,7 +494,7 @@ class RentalService {
         .map((snapshot) {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
-          
+
           return snapshot.docs
               .map((doc) => RentalRequest.fromMap(doc.data()))
               .where((rental) {
@@ -456,7 +519,7 @@ class RentalService {
           final now = DateTime.now();
           final today = DateTime(now.year, now.month, now.day);
           final threeDaysFromNow = today.add(const Duration(days: 3));
-          
+
           return snapshot.docs
               .map((doc) => RentalRequest.fromMap(doc.data()))
               .where((rental) {
@@ -465,8 +528,12 @@ class RentalService {
                   rental.endDate.month,
                   rental.endDate.day,
                 );
-                return endDate.isAfter(today.subtract(const Duration(days: 1))) && 
-                       endDate.isBefore(threeDaysFromNow.add(const Duration(days: 1)));
+                return endDate.isAfter(
+                      today.subtract(const Duration(days: 1)),
+                    ) &&
+                    endDate.isBefore(
+                      threeDaysFromNow.add(const Duration(days: 1)),
+                    );
               })
               .toList();
         });

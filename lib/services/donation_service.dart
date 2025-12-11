@@ -95,7 +95,10 @@ class DonationService {
   ) async {
     try {
       // Get the donation first for notification
-      final donationDoc = await _firestore.collection(_collectionName).doc(donationId).get();
+      final donationDoc = await _firestore
+          .collection(_collectionName)
+          .doc(donationId)
+          .get();
       final donation = DonationSubmission.fromMap(donationDoc.data()!);
 
       final batch = _firestore.batch();
@@ -133,7 +136,10 @@ class DonationService {
   ) async {
     try {
       // Get the donation first for notification
-      final donationDoc = await _firestore.collection(_collectionName).doc(donationId).get();
+      final donationDoc = await _firestore
+          .collection(_collectionName)
+          .doc(donationId)
+          .get();
       final donation = DonationSubmission.fromMap(donationDoc.data()!);
 
       await _firestore.collection(_collectionName).doc(donationId).update({

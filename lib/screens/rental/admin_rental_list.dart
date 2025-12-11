@@ -32,7 +32,7 @@ class AdminRentalList extends StatelessWidget {
               type: 'pending',
             ),
             _RentalTab(
-              stream: rentalService.getActiveRentals(),
+              stream: rentalService.getApprovedAndActiveRentals(),
               type: 'active',
             ),
             _RentalTab(stream: rentalService.getAllRentals(), type: 'history'),

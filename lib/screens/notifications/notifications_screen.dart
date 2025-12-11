@@ -77,8 +77,10 @@ class NotificationsScreen extends StatelessWidget {
                   children: [
                     Icon(Icons.done_all, color: Colors.white, size: 20),
                     SizedBox(width: 8),
-                    Text('Mark all as read',
-                        style: TextStyle(color: Colors.white)),
+                    Text(
+                      'Mark all as read',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ],
                 ),
               ),
@@ -230,10 +232,7 @@ class _NotificationCard extends StatelessWidget {
   final AppNotification notification;
   final VoidCallback onTap;
 
-  const _NotificationCard({
-    required this.notification,
-    required this.onTap,
-  });
+  const _NotificationCard({required this.notification, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -293,20 +292,14 @@ class _NotificationCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       notification.message,
-                      style: TextStyle(
-                        color: Colors.grey[400],
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Colors.grey[400], fontSize: 13),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 8),
                     Text(
                       _formatTimeAgo(notification.createdAt),
-                      style: TextStyle(
-                        color: Colors.grey[600],
-                        fontSize: 12,
-                      ),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 12),
                     ),
                   ],
                 ),

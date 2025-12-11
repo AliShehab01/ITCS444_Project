@@ -357,7 +357,9 @@ class _ApprovalDialogState extends State<_ApprovalDialog> {
             TextField(
               controller: _priceController,
               style: const TextStyle(color: Colors.white),
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*')),
               ],
