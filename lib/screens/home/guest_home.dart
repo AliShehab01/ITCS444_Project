@@ -3,8 +3,32 @@ import '../login_screen.dart';
 import '../equipment/browse_equipment_screen.dart';
 import '../donation/donation_submission_form.dart';
 
-class GuestHome extends StatelessWidget {
+class GuestHome extends StatefulWidget {
   const GuestHome({super.key});
+
+  @override
+  State<GuestHome> createState() => _GuestHomeState();
+}
+
+class _GuestHomeState extends State<GuestHome> {
+  final _searchController = TextEditingController();
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _performSearch() {
+    final query = _searchController.text.trim();
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BrowseEquipmentScreen(
+          initialSearchQuery: query.isNotEmpty ? query : null,
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,11 +138,16 @@ class GuestHome extends StatelessWidget {
 
             // Search Bar
             TextField(
+              controller: _searchController,
               style: const TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 hintText: 'Search items...',
                 hintStyle: TextStyle(color: Colors.grey[500]),
                 prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
+                suffixIcon: IconButton(
+                  icon: Icon(Icons.arrow_forward, color: Colors.orange[400]),
+                  onPressed: _performSearch,
+                ),
                 filled: true,
                 fillColor: Colors.grey[850],
                 border: OutlineInputBorder(
@@ -126,6 +155,7 @@ class GuestHome extends StatelessWidget {
                   borderSide: BorderSide.none,
                 ),
               ),
+              onSubmitted: (_) => _performSearch(),
             ),
             const SizedBox(height: 24),
 

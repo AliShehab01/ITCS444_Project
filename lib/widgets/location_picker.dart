@@ -10,10 +10,7 @@ class LocationResult {
 class LocationPickerScreen extends StatefulWidget {
   final String? initialLocation;
 
-  const LocationPickerScreen({
-    super.key,
-    this.initialLocation,
-  });
+  const LocationPickerScreen({super.key, this.initialLocation});
 
   @override
   State<LocationPickerScreen> createState() => _LocationPickerScreenState();
@@ -44,13 +41,16 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              Navigator.of(context).pop(LocationResult(
-                address: _controller.text,
-              ));
+              Navigator.of(
+                context,
+              ).pop(LocationResult(address: _controller.text));
             },
             child: const Text(
               'Done',
-              style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
         ],
@@ -71,10 +71,7 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 children: [
                   Text(
                     'Location',
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 14,
-                    ),
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14),
                   ),
                   const SizedBox(height: 8),
                   TextField(
@@ -89,21 +86,21 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      prefixIcon: Icon(Icons.location_on, color: Colors.red[400]),
+                      prefixIcon: Icon(
+                        Icons.location_on,
+                        color: Colors.red[400],
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Quick location suggestions
             Text(
               'Quick Select',
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey[400], fontSize: 14),
             ),
             const SizedBox(height: 8),
             Wrap(
@@ -118,14 +115,14 @@ class _LocationPickerScreenState extends State<LocationPickerScreen> {
                 _quickLocationChip('Sitra, Bahrain'),
               ],
             ),
-            
+
             const Spacer(),
-            
+
             ElevatedButton(
               onPressed: () {
-                Navigator.of(context).pop(LocationResult(
-                  address: _controller.text,
-                ));
+                Navigator.of(
+                  context,
+                ).pop(LocationResult(address: _controller.text));
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green[600],
@@ -176,9 +173,8 @@ class LocationPickerField extends StatelessWidget {
   void _openLocationPicker(BuildContext context) async {
     final result = await Navigator.of(context).push<LocationResult>(
       MaterialPageRoute(
-        builder: (context) => LocationPickerScreen(
-          initialLocation: controller.text,
-        ),
+        builder: (context) =>
+            LocationPickerScreen(initialLocation: controller.text),
       ),
     );
 

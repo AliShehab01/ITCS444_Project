@@ -8,8 +8,13 @@ import 'add_edit_equipment_screen.dart';
 
 class BrowseEquipmentScreen extends StatefulWidget {
   final bool showMyItemsOnly;
+  final String? initialSearchQuery;
 
-  const BrowseEquipmentScreen({super.key, this.showMyItemsOnly = false});
+  const BrowseEquipmentScreen({
+    super.key,
+    this.showMyItemsOnly = false,
+    this.initialSearchQuery,
+  });
 
   @override
   State<BrowseEquipmentScreen> createState() => _BrowseEquipmentScreenState();
@@ -31,6 +36,10 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
   void initState() {
     super.initState();
     _showMyItemsOnly = widget.showMyItemsOnly;
+    if (widget.initialSearchQuery != null) {
+      _searchQuery = widget.initialSearchQuery!;
+      _searchController.text = widget.initialSearchQuery!;
+    }
     _loadUserRole();
   }
 
@@ -140,18 +149,6 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
                 onChanged: (value) => setState(() => _filterStatus = value),
               ),
               const SizedBox(height: 16),
-
-              // Donated Only Checkbox
-              CheckboxListTile(
-                title: const Text(
-                  'Donated Items Only',
-                  style: TextStyle(color: Colors.white),
-                ),
-                value: _showDonatedOnly,
-                activeColor: Colors.blue[400],
-                onChanged: (value) =>
-                    setState(() => _showDonatedOnly = value ?? false),
-              ),
 
               // My Items Only Checkbox
               CheckboxListTile(

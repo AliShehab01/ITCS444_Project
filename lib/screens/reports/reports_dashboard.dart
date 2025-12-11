@@ -211,7 +211,9 @@ class _ReportsDashboardState extends State<ReportsDashboard>
 
         return Column(
           children: overdueRentals.map((rental) {
-            final daysOverdue = DateTime.now().difference(rental.endDate).inDays;
+            final daysOverdue = DateTime.now()
+                .difference(rental.endDate)
+                .inDays;
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(12),
@@ -237,14 +239,19 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                         ),
                         Text(
                           'Rented by: ${rental.renterName}',
-                          style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red,
                       borderRadius: BorderRadius.circular(8),
@@ -307,7 +314,10 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                         ),
                         Text(
                           '${rental.renterName} • ${_formatDate(rental.createdAt)}',
-                          style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                          style: TextStyle(
+                            color: Colors.grey[400],
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ),
@@ -366,20 +376,40 @@ class _ReportsDashboardState extends State<ReportsDashboard>
           ),
           child: Column(
             children: [
-              _buildStatRow('Total Rentals', '${stats['total'] ?? 0}',
-                  Icons.assignment, Colors.blue),
+              _buildStatRow(
+                'Total Rentals',
+                '${stats['total'] ?? 0}',
+                Icons.assignment,
+                Colors.blue,
+              ),
               const Divider(color: Colors.grey),
-              _buildStatRow('Active Rentals', '${stats['active'] ?? 0}',
-                  Icons.schedule, Colors.green),
+              _buildStatRow(
+                'Active Rentals',
+                '${stats['active'] ?? 0}',
+                Icons.schedule,
+                Colors.green,
+              ),
               const Divider(color: Colors.grey),
-              _buildStatRow('Pending Requests', '${stats['pending'] ?? 0}',
-                  Icons.pending_actions, Colors.orange),
+              _buildStatRow(
+                'Pending Requests',
+                '${stats['pending'] ?? 0}',
+                Icons.pending_actions,
+                Colors.orange,
+              ),
               const Divider(color: Colors.grey),
-              _buildStatRow('Completed', '${stats['completed'] ?? 0}',
-                  Icons.check_circle, Colors.purple),
+              _buildStatRow(
+                'Completed',
+                '${stats['completed'] ?? 0}',
+                Icons.check_circle,
+                Colors.purple,
+              ),
               const Divider(color: Colors.grey),
-              _buildStatRow('Overdue', '${stats['overdue'] ?? 0}', Icons.warning,
-                  Colors.red),
+              _buildStatRow(
+                'Overdue',
+                '${stats['overdue'] ?? 0}',
+                Icons.warning,
+                Colors.red,
+              ),
             ],
           ),
         );
@@ -401,10 +431,7 @@ class _ReportsDashboardState extends State<ReportsDashboard>
           if (itemCounts.containsKey(rental.itemId)) {
             itemCounts[rental.itemId]!['count']++;
           } else {
-            itemCounts[rental.itemId] = {
-              'name': rental.itemName,
-              'count': 1,
-            };
+            itemCounts[rental.itemId] = {'name': rental.itemName, 'count': 1};
           }
         }
 
@@ -454,8 +481,10 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.blue[700],
                       borderRadius: BorderRadius.circular(16),
@@ -500,8 +529,9 @@ class _ReportsDashboardState extends State<ReportsDashboard>
 
         // Duration distribution
         final shortTerm = rentals.where((r) => r.durationDays <= 3).length;
-        final mediumTerm =
-            rentals.where((r) => r.durationDays > 3 && r.durationDays <= 7).length;
+        final mediumTerm = rentals
+            .where((r) => r.durationDays > 3 && r.durationDays <= 7)
+            .length;
         final longTerm = rentals.where((r) => r.durationDays > 7).length;
 
         return Container(
@@ -516,7 +546,9 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                 children: [
                   Expanded(
                     child: _buildDurationStat(
-                        'Average', '${avgDuration.toStringAsFixed(1)} days'),
+                      'Average',
+                      '${avgDuration.toStringAsFixed(1)} days',
+                    ),
                   ),
                   Expanded(
                     child: _buildDurationStat('Max', '$maxDuration days'),
@@ -538,17 +570,29 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                 children: [
                   Expanded(
                     child: _buildDurationBar(
-                        'Short (1-3)', shortTerm, rentals.length, Colors.green),
+                      'Short (1-3)',
+                      shortTerm,
+                      rentals.length,
+                      Colors.green,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _buildDurationBar(
-                        'Medium (4-7)', mediumTerm, rentals.length, Colors.orange),
+                      'Medium (4-7)',
+                      mediumTerm,
+                      rentals.length,
+                      Colors.orange,
+                    ),
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: _buildDurationBar(
-                        'Long (8+)', longTerm, rentals.length, Colors.red),
+                      'Long (8+)',
+                      longTerm,
+                      rentals.length,
+                      Colors.red,
+                    ),
                   ),
                 ],
               ),
@@ -570,10 +614,7 @@ class _ReportsDashboardState extends State<ReportsDashboard>
             fontWeight: FontWeight.bold,
           ),
         ),
-        Text(
-          label,
-          style: TextStyle(color: Colors.grey[400], fontSize: 12),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
       ],
     );
   }
@@ -693,8 +734,10 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.purple[700],
                       borderRadius: BorderRadius.circular(16),
@@ -751,12 +794,15 @@ class _ReportsDashboardState extends State<ReportsDashboard>
         }
 
         final donations = snapshot.data!;
-        final pending =
-            donations.where((d) => d.status == DonationStatus.pending).length;
-        final approved =
-            donations.where((d) => d.status == DonationStatus.approved).length;
-        final rejected =
-            donations.where((d) => d.status == DonationStatus.rejected).length;
+        final pending = donations
+            .where((d) => d.status == DonationStatus.pending)
+            .length;
+        final approved = donations
+            .where((d) => d.status == DonationStatus.approved)
+            .length;
+        final rejected = donations
+            .where((d) => d.status == DonationStatus.rejected)
+            .length;
 
         final totalQuantity = donations
             .where((d) => d.status == DonationStatus.approved)
@@ -770,19 +816,35 @@ class _ReportsDashboardState extends State<ReportsDashboard>
           ),
           child: Column(
             children: [
-              _buildStatRow('Total Submissions', '${donations.length}',
-                  Icons.volunteer_activism, Colors.blue),
-              const Divider(color: Colors.grey),
-              _buildStatRow('Pending Review', '$pending', Icons.pending_actions,
-                  Colors.orange),
+              _buildStatRow(
+                'Total Submissions',
+                '${donations.length}',
+                Icons.volunteer_activism,
+                Colors.blue,
+              ),
               const Divider(color: Colors.grey),
               _buildStatRow(
-                  'Approved', '$approved', Icons.check_circle, Colors.green),
+                'Pending Review',
+                '$pending',
+                Icons.pending_actions,
+                Colors.orange,
+              ),
+              const Divider(color: Colors.grey),
+              _buildStatRow(
+                'Approved',
+                '$approved',
+                Icons.check_circle,
+                Colors.green,
+              ),
               const Divider(color: Colors.grey),
               _buildStatRow('Rejected', '$rejected', Icons.cancel, Colors.red),
               const Divider(color: Colors.grey),
-              _buildStatRow('Total Items Donated', '$totalQuantity',
-                  Icons.inventory, Colors.purple),
+              _buildStatRow(
+                'Total Items Donated',
+                '$totalQuantity',
+                Icons.inventory,
+                Colors.purple,
+              ),
             ],
           ),
         );
@@ -800,8 +862,9 @@ class _ReportsDashboardState extends State<ReportsDashboard>
 
         // Count donations per item type
         final typeCounts = <String, int>{};
-        for (var donation in snapshot.data!
-            .where((d) => d.status == DonationStatus.approved)) {
+        for (var donation in snapshot.data!.where(
+          (d) => d.status == DonationStatus.approved,
+        )) {
           typeCounts[donation.itemType] =
               (typeCounts[donation.itemType] ?? 0) + donation.quantity;
         }
@@ -852,8 +915,10 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.teal[700],
                       borderRadius: BorderRadius.circular(16),
@@ -886,8 +951,9 @@ class _ReportsDashboardState extends State<ReportsDashboard>
 
         // Count donations per donor
         final donorCounts = <String, Map<String, dynamic>>{};
-        for (var donation in snapshot.data!
-            .where((d) => d.status == DonationStatus.approved)) {
+        for (var donation in snapshot.data!.where(
+          (d) => d.status == DonationStatus.approved,
+        )) {
           if (donorCounts.containsKey(donation.donorId)) {
             donorCounts[donation.donorId]!['count'] += donation.quantity;
           } else {
@@ -952,8 +1018,10 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.pink[700],
                       borderRadius: BorderRadius.circular(16),
@@ -1020,20 +1088,40 @@ class _ReportsDashboardState extends State<ReportsDashboard>
           ),
           child: Column(
             children: [
-              _buildStatRow('Total Items', '${stats['total'] ?? 0}',
-                  Icons.inventory_2, Colors.blue),
+              _buildStatRow(
+                'Total Items',
+                '${stats['total'] ?? 0}',
+                Icons.inventory_2,
+                Colors.blue,
+              ),
               const Divider(color: Colors.grey),
-              _buildStatRow('Available', '${stats['available'] ?? 0}',
-                  Icons.check_box, Colors.green),
+              _buildStatRow(
+                'Available',
+                '${stats['available'] ?? 0}',
+                Icons.check_box,
+                Colors.green,
+              ),
               const Divider(color: Colors.grey),
-              _buildStatRow('Currently Rented', '${stats['rented'] ?? 0}',
-                  Icons.person, Colors.orange),
+              _buildStatRow(
+                'Currently Rented',
+                '${stats['rented'] ?? 0}',
+                Icons.person,
+                Colors.orange,
+              ),
               const Divider(color: Colors.grey),
-              _buildStatRow('Reserved', '${stats['reserved'] ?? 0}',
-                  Icons.bookmark, Colors.purple),
+              _buildStatRow(
+                'Reserved',
+                '${stats['reserved'] ?? 0}',
+                Icons.bookmark,
+                Colors.purple,
+              ),
               const Divider(color: Colors.grey),
-              _buildStatRow('Under Maintenance', '${stats['underMaintenance'] ?? 0}',
-                  Icons.build, Colors.red),
+              _buildStatRow(
+                'Under Maintenance',
+                '${stats['underMaintenance'] ?? 0}',
+                Icons.build,
+                Colors.red,
+              ),
             ],
           ),
         );
@@ -1065,8 +1153,8 @@ class _ReportsDashboardState extends State<ReportsDashboard>
 
         return Column(
           children: sortedTypes.map((entry) {
-            final percentage =
-                (entry.value / snapshot.data!.length * 100).toStringAsFixed(1);
+            final percentage = (entry.value / snapshot.data!.length * 100)
+                .toStringAsFixed(1);
             return Container(
               margin: const EdgeInsets.only(bottom: 8),
               padding: const EdgeInsets.all(12),
@@ -1094,8 +1182,9 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                         LinearProgressIndicator(
                           value: entry.value / snapshot.data!.length,
                           backgroundColor: Colors.grey[700],
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.blue[400]!),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.blue[400]!,
+                          ),
                         ),
                       ],
                     ),
@@ -1103,10 +1192,7 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                   const SizedBox(width: 12),
                   Text(
                     '${entry.value} ($percentage%)',
-                    style: TextStyle(
-                      color: Colors.grey[400],
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey[400], fontSize: 12),
                   ),
                 ],
               ),
@@ -1143,8 +1229,9 @@ class _ReportsDashboardState extends State<ReportsDashboard>
           child: Column(
             children: ItemCondition.values.map((condition) {
               final count = conditionCounts[condition] ?? 0;
-              final percentage =
-                  total > 0 ? (count / total * 100).toStringAsFixed(1) : '0.0';
+              final percentage = total > 0
+                  ? (count / total * 100).toStringAsFixed(1)
+                  : '0.0';
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
                 child: Row(
@@ -1223,18 +1310,17 @@ class _ReportsDashboardState extends State<ReportsDashboard>
                     ),
                   ),
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.grey[700],
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Text(
                       '${entry.value} items',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                      ),
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
                     ),
                   ),
                 ],
@@ -1259,7 +1345,11 @@ class _ReportsDashboardState extends State<ReportsDashboard>
   }
 
   Widget _buildStatCard(
-      String label, String value, IconData icon, Color color) {
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -1297,10 +1387,7 @@ class _ReportsDashboardState extends State<ReportsDashboard>
           Icon(icon, color: color, size: 24),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
-              label,
-              style: const TextStyle(color: Colors.white),
-            ),
+            child: Text(label, style: const TextStyle(color: Colors.white)),
           ),
           Text(
             value,
@@ -1327,10 +1414,7 @@ class _ReportsDashboardState extends State<ReportsDashboard>
           children: [
             Icon(Icons.inbox, color: Colors.grey[600], size: 48),
             const SizedBox(height: 12),
-            Text(
-              message,
-              style: TextStyle(color: Colors.grey[400]),
-            ),
+            Text(message, style: TextStyle(color: Colors.grey[400])),
           ],
         ),
       ),
@@ -1472,10 +1556,7 @@ class _ReportsDashboardState extends State<ReportsDashboard>
 
   String _formatTypeName(String type) {
     return type
-        .replaceAllMapped(
-          RegExp(r'([A-Z])'),
-          (match) => ' ${match.group(1)}',
-        )
+        .replaceAllMapped(RegExp(r'([A-Z])'), (match) => ' ${match.group(1)}')
         .trim()
         .split(' ')
         .map((word) => word[0].toUpperCase() + word.substring(1))

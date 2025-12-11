@@ -22,11 +22,9 @@ class RentalService {
         'id': docRef.id,
       });
 
-      // Update item status to reserved
-      await _equipmentService.updateItemStatus(
-        request.itemId,
-        ItemStatus.reserved,
-      );
+      // After creating rental, check if there are still available days in the next month
+      // If fully booked, mark as reserved; otherwise keep available
+      await _updateItemAvailabilityStatus(request.itemId);
 
       // Notify admins about new rental request
       final updatedRequest = request.copyWith(id: docRef.id);
@@ -35,6 +33,71 @@ class RentalService {
       return docRef.id;
     } catch (e) {
       throw 'Error creating rental request: ${e.toString()}';
+    }
+  }
+
+  // Check if item has available days in the next month and update status accordingly
+  Future<void> _updateItemAvailabilityStatus(String itemId) async {
+    try {
+      final hasAvailableDays = await hasAvailableDaysInNextMonth(itemId);
+      final item = await _equipmentService.getEquipmentById(itemId);
+      
+      if (item == null) return;
+      
+      // Only update if item is currently available or reserved (not rented/maintenance)
+      if (item.status == ItemStatus.available || item.status == ItemStatus.reserved) {
+        if (hasAvailableDays) {
+          // There are still available days, keep/mark as available
+          if (item.status != ItemStatus.available) {
+            await _equipmentService.updateItemStatus(itemId, ItemStatus.available);
+          }
+        } else {
+          // Fully booked for the next month, mark as reserved
+          if (item.status != ItemStatus.reserved) {
+            await _equipmentService.updateItemStatus(itemId, ItemStatus.reserved);
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('Error updating item availability: $e');
+    }
+  }
+
+  // Check if there are any available days in the next 30 days for an item
+  Future<bool> hasAvailableDaysInNextMonth(String itemId) async {
+    try {
+      final now = DateTime.now();
+      final today = DateTime(now.year, now.month, now.day);
+      
+      // Get all reserved date ranges for this item
+      final reservedRanges = await getReservedDatesForItem(itemId);
+      
+      // Check each day in the next 30 days
+      for (int i = 0; i <= 30; i++) {
+        final checkDate = today.add(Duration(days: i));
+        bool isDayAvailable = true;
+        
+        for (var range in reservedRanges) {
+          final rangeStart = DateTime(range.start.year, range.start.month, range.start.day);
+          final rangeEnd = DateTime(range.end.year, range.end.month, range.end.day);
+          
+          // Check if this day falls within a reserved range
+          if ((checkDate.isAtSameMomentAs(rangeStart) || checkDate.isAfter(rangeStart)) &&
+              (checkDate.isAtSameMomentAs(rangeEnd) || checkDate.isBefore(rangeEnd))) {
+            isDayAvailable = false;
+            break;
+          }
+        }
+        
+        if (isDayAvailable) {
+          return true; // Found at least one available day
+        }
+      }
+      
+      return false; // All days are reserved
+    } catch (e) {
+      debugPrint('Error checking available days: $e');
+      return true; // Default to available on error
     }
   }
 
@@ -85,8 +148,8 @@ class RentalService {
         'adminNotes': notes,
       });
 
-      // Make item available again
-      await _equipmentService.updateItemStatus(itemId, ItemStatus.available);
+      // Re-check item availability after rejecting this rental
+      await _updateItemAvailabilityStatus(itemId);
 
       // Notify the renter
       await _notificationService.notifyRentalRejected(rental, notes);
@@ -140,8 +203,8 @@ class RentalService {
         'returnedAt': Timestamp.now(),
       });
 
-      // Update item status to available
-      await _equipmentService.updateItemStatus(itemId, ItemStatus.available);
+      // Re-check item availability after return
+      await _updateItemAvailabilityStatus(itemId);
 
       // Notify the renter about successful return
       await _notificationService.createNotification(
@@ -164,6 +227,27 @@ class RentalService {
   // Helper function to format date
   String _formatDate(DateTime date) {
     return '${date.month}/${date.day}/${date.year}';
+  }
+
+  // Check and update item statuses based on availability in the next month
+  // Call this periodically to keep item statuses accurate
+  Future<void> updateUpcomingReservationStatuses() async {
+    try {
+      // Get all items that are available or reserved
+      final equipmentSnapshot = await _firestore.collection('equipment').get();
+      
+      for (var doc in equipmentSnapshot.docs) {
+        final item = EquipmentItem.fromMap(doc.data());
+        
+        // Only check items that are available or reserved (not rented/maintenance)
+        if (item.status == ItemStatus.available || item.status == ItemStatus.reserved) {
+          await _updateItemAvailabilityStatus(item.id);
+        }
+      }
+    } catch (e) {
+      // Silently fail - this is a background task
+      debugPrint('Error updating reservation statuses: $e');
+    }
   }
 
   // Get rental requests by renter
@@ -229,9 +313,11 @@ class RentalService {
     return _firestore.collection(_collection).snapshots().map((snapshot) {
       final rentals = snapshot.docs
           .map((doc) => RentalRequest.fromMap(doc.data()))
-          .where((r) =>
-              r.status == RentalStatus.approved ||
-              r.status == RentalStatus.checkedOut)
+          .where(
+            (r) =>
+                r.status == RentalStatus.approved ||
+                r.status == RentalStatus.checkedOut,
+          )
           .toList();
       rentals.sort((a, b) => b.createdAt.compareTo(a.createdAt));
       return rentals;
@@ -276,12 +362,8 @@ class RentalService {
         'status': RentalStatus.cancelled.name,
       });
 
-      // Make item available again if it was reserved
-      final rental = await getRentalById(requestId);
-      if (rental?.status == RentalStatus.pending ||
-          rental?.status == RentalStatus.approved) {
-        await _equipmentService.updateItemStatus(itemId, ItemStatus.available);
-      }
+      // Re-check item availability after cancellation
+      await _updateItemAvailabilityStatus(itemId);
     } catch (e) {
       throw 'Error cancelling rental request: ${e.toString()}';
     }
@@ -336,11 +418,21 @@ class RentalService {
       final now = DateTime.now();
       return {
         'total': rentals.length,
-        'active': rentals.where((r) => r.status == RentalStatus.checkedOut).length,
-        'pending': rentals.where((r) => r.status == RentalStatus.pending).length,
-        'completed': rentals.where((r) => r.status == RentalStatus.returned).length,
+        'active': rentals
+            .where((r) => r.status == RentalStatus.checkedOut)
+            .length,
+        'pending': rentals
+            .where((r) => r.status == RentalStatus.pending)
+            .length,
+        'completed': rentals
+            .where((r) => r.status == RentalStatus.returned)
+            .length,
         'overdue': rentals
-            .where((r) => r.status == RentalStatus.checkedOut && r.endDate.isBefore(now))
+            .where(
+              (r) =>
+                  r.status == RentalStatus.checkedOut &&
+                  r.endDate.isBefore(now),
+            )
             .length,
       };
     });
@@ -353,20 +445,24 @@ class RentalService {
         .where('renterId', isEqualTo: userId)
         .snapshots()
         .map((snapshot) {
-      final rentals = snapshot.docs
-          .map((doc) => RentalRequest.fromMap(doc.data()))
-          .toList();
+          final rentals = snapshot.docs
+              .map((doc) => RentalRequest.fromMap(doc.data()))
+              .toList();
 
-      return {
-        'active': rentals
-            .where((r) =>
-                r.status == RentalStatus.checkedOut ||
-                r.status == RentalStatus.approved ||
-                r.status == RentalStatus.pending)
-            .length,
-        'completed': rentals.where((r) => r.status == RentalStatus.returned).length,
-      };
-    });
+          return {
+            'active': rentals
+                .where(
+                  (r) =>
+                      r.status == RentalStatus.checkedOut ||
+                      r.status == RentalStatus.approved ||
+                      r.status == RentalStatus.pending,
+                )
+                .length,
+            'completed': rentals
+                .where((r) => r.status == RentalStatus.returned)
+                .length,
+          };
+        });
   }
 
   // Get reserved date ranges for an item

@@ -27,6 +27,8 @@ class _AdminHomeState extends State<AdminHome> {
     super.initState();
     // Check for overdue rentals when admin opens the app
     _notificationService.checkRentalDueDates();
+    // Update reservation statuses for items with upcoming rentals within 30 days
+    _rentalService.updateUpcomingReservationStatuses();
   }
 
   @override
@@ -275,7 +277,8 @@ class _AdminHomeState extends State<AdminHome> {
                   builder: (context, rentalSnapshot) {
                     final totalItems = equipmentSnapshot.data?['total'] ?? 0;
                     final activeRentals = rentalSnapshot.data?['active'] ?? 0;
-                    final pendingRequests = rentalSnapshot.data?['pending'] ?? 0;
+                    final pendingRequests =
+                        rentalSnapshot.data?['pending'] ?? 0;
 
                     return Column(
                       children: [
@@ -315,7 +318,8 @@ class _AdminHomeState extends State<AdminHome> {
                             Expanded(
                               child: _buildStatCard(
                                 'Completed',
-                                (rentalSnapshot.data?['completed'] ?? 0).toString(),
+                                (rentalSnapshot.data?['completed'] ?? 0)
+                                    .toString(),
                                 Icons.check_circle,
                                 Colors.purple[400]!,
                               ),

@@ -209,10 +209,14 @@ class EquipmentService {
 
       return {
         'total': items.length,
-        'available': items.where((i) => i.status == ItemStatus.available).length,
+        'available': items
+            .where((i) => i.status == ItemStatus.available)
+            .length,
         'rented': items.where((i) => i.status == ItemStatus.rented).length,
         'reserved': items.where((i) => i.status == ItemStatus.reserved).length,
-        'underMaintenance': items.where((i) => i.status == ItemStatus.underMaintenance).length,
+        'underMaintenance': items
+            .where((i) => i.status == ItemStatus.underMaintenance)
+            .length,
       };
     });
   }

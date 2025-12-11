@@ -365,28 +365,7 @@ class _AddEditEquipmentScreenState extends State<AddEditEquipmentScreen> {
                 const SizedBox(height: 16),
               ],
 
-              // Is Donated Checkbox
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[800],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: CheckboxListTile(
-                  title: const Text(
-                    'This is a donated item',
-                    style: TextStyle(color: Colors.white),
-                  ),
-                  value: _isDonated,
-                  activeColor: Colors.blue[400],
-                  onChanged: (value) {
-                    setState(() {
-                      _isDonated = value ?? false;
-                    });
-                  },
-                ),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 8),
 
               // Save Button
               ElevatedButton(
