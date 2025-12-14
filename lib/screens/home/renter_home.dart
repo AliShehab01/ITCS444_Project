@@ -7,6 +7,7 @@ import '../notifications/notifications_screen.dart';
 import '../../services/auth_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/rental_service.dart';
+import '../../utils/page_transitions.dart';
 
 class RenterHome extends StatefulWidget {
   const RenterHome({super.key});
@@ -197,8 +198,8 @@ class _RenterHomeState extends State<RenterHome> {
                   color: Colors.blue[400]!,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const BrowseEquipmentScreen(),
+                      FadeSlidePageRoute(
+                        page: const BrowseEquipmentScreen(),
                       ),
                     );
                   },
@@ -212,8 +213,8 @@ class _RenterHomeState extends State<RenterHome> {
                   onTap: () {
                     if (_userId != null && _userName != null) {
                       Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => RentalTrackingScreen(
+                        FadeSlidePageRoute(
+                          page: RentalTrackingScreen(
                             renterId: _userId!,
                             renterName: _userName!,
                           ),
@@ -230,8 +231,8 @@ class _RenterHomeState extends State<RenterHome> {
                   color: Colors.orange[400]!,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const DonationSubmissionForm(),
+                      FadeSlidePageRoute(
+                        page: const DonationSubmissionForm(),
                       ),
                     );
                   },
@@ -331,11 +332,10 @@ class _RenterHomeState extends State<RenterHome> {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Card(
-      color: Colors.grey[850],
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+    return _AnimatedCard(
+      onTap: onTap,
+      child: Card(
+        color: Colors.grey[850],
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -366,6 +366,334 @@ class _RenterHomeState extends State<RenterHome> {
   }
 
   Widget _buildStatCard(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Card(
+      color: Colors.grey[850],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Icon(icon, color: color, size: 32),
+            const SizedBox(height: 8),
+            Text(
+              value,
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              label,
+              style: TextStyle(color: Colors.grey[400], fontSize: 12),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Simple animated card with scale effect on tap
+class _AnimatedCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _AnimatedCard({required this.child, required this.onTap});
+
+  @override
+  State<_AnimatedCard> createState() => _AnimatedCardState();
+}
+
+class _AnimatedCardState extends State<_AnimatedCard> {
+  double _scale = 1.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _scale = 0.95),
+      onTapUp: (_) {
+        setState(() => _scale = 1.0);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _scale = 1.0),
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 100),
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+/// Reusable content widget for embedding renter view in admin
+class RenterHomeContent extends StatefulWidget {
+  final String? userId;
+  final String? userName;
+  final bool forceRenterView;
+
+  const RenterHomeContent({
+    super.key,
+    required this.userId,
+    required this.userName,
+    this.forceRenterView = false,
+  });
+
+  @override
+  State<RenterHomeContent> createState() => _RenterHomeContentState();
+}
+
+class _RenterHomeContentState extends State<RenterHomeContent> {
+  final _rentalService = RentalService();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Welcome Card
+          Card(
+            color: Colors.green[400],
+            child: Padding(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(Icons.shopping_bag, size: 40, color: Colors.white),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Renter Portal',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Browse and rent items',
+                              style: TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Quick Actions Section
+          Text(
+            'Quick Actions',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Action Cards Grid
+          GridView.count(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            crossAxisCount: 2,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            children: [
+              _buildContentActionCard(
+                context,
+                icon: Icons.storefront,
+                title: 'Browse Items',
+                subtitle: 'View available items',
+                color: Colors.blue[400]!,
+                onTap: () {
+                  Navigator.of(context).push(
+                    FadeSlidePageRoute(
+                      page: BrowseEquipmentScreen(
+                        forceRenterView: widget.forceRenterView,
+                      ),
+                    ),
+                  );
+                },
+              ),
+              _buildContentActionCard(
+                context,
+                icon: Icons.history,
+                title: 'My Rentals',
+                subtitle: 'View rental history',
+                color: Colors.purple[400]!,
+                onTap: () {
+                  if (widget.userId != null && widget.userName != null) {
+                    Navigator.of(context).push(
+                      FadeSlidePageRoute(
+                        page: RentalTrackingScreen(
+                          renterId: widget.userId!,
+                          renterName: widget.userName!,
+                        ),
+                      ),
+                    );
+                  }
+                },
+              ),
+              _buildContentActionCard(
+                context,
+                icon: Icons.volunteer_activism,
+                title: 'Donate',
+                subtitle: 'Donate equipment',
+                color: Colors.orange[400]!,
+                onTap: () {
+                  Navigator.of(context).push(
+                    FadeSlidePageRoute(
+                      page: const DonationSubmissionForm(),
+                    ),
+                  );
+                },
+              ),
+              _buildContentActionCard(
+                context,
+                icon: Icons.favorite,
+                title: 'Favorites',
+                subtitle: 'Saved items',
+                color: Colors.red[400]!,
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Favorites - Coming Soon')),
+                  );
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 24),
+
+          // Quick Stats Section
+          Text(
+            'My Activity',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          // Stats Cards with real data
+          if (widget.userId != null)
+            StreamBuilder<Map<String, int>>(
+              stream: _rentalService.getUserRentalStatsStream(widget.userId!),
+              builder: (context, snapshot) {
+                final activeRentals = snapshot.data?['active'] ?? 0;
+                final completed = snapshot.data?['completed'] ?? 0;
+
+                return Row(
+                  children: [
+                    Expanded(
+                      child: _buildContentStatCard(
+                        'Active Rentals',
+                        activeRentals.toString(),
+                        Icons.schedule,
+                        Colors.green[400]!,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildContentStatCard(
+                        'Completed',
+                        completed.toString(),
+                        Icons.check_circle,
+                        Colors.blue[400]!,
+                      ),
+                    ),
+                  ],
+                );
+              },
+            )
+          else
+            Row(
+              children: [
+                Expanded(
+                  child: _buildContentStatCard(
+                    'Active Rentals',
+                    '0',
+                    Icons.schedule,
+                    Colors.green[400]!,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: _buildContentStatCard(
+                    'Completed',
+                    '0',
+                    Icons.check_circle,
+                    Colors.blue[400]!,
+                  ),
+                ),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildContentActionCard(
+    BuildContext context, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return _AnimatedCard(
+      onTap: onTap,
+      child: Card(
+        color: Colors.grey[850],
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 48, color: color),
+              const SizedBox(height: 12),
+              Text(
+                title,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 4),
+              Text(
+                subtitle,
+                style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildContentStatCard(
     String label,
     String value,
     IconData icon,

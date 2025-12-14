@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../login_screen.dart';
 import '../equipment/browse_equipment_screen.dart';
 import '../donation/donation_submission_form.dart';
+import '../../utils/page_transitions.dart';
 
 class GuestHome extends StatefulWidget {
   const GuestHome({super.key});
@@ -22,8 +23,8 @@ class _GuestHomeState extends State<GuestHome> {
   void _performSearch() {
     final query = _searchController.text.trim();
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => BrowseEquipmentScreen(
+      FadeSlidePageRoute(
+        page: BrowseEquipmentScreen(
           initialSearchQuery: query.isNotEmpty ? query : null,
         ),
       ),
@@ -176,8 +177,8 @@ class _GuestHomeState extends State<GuestHome> {
               child: InkWell(
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const BrowseEquipmentScreen(),
+                    FadeSlidePageRoute(
+                      page: const BrowseEquipmentScreen(),
                     ),
                   );
                 },
@@ -225,8 +226,8 @@ class _GuestHomeState extends State<GuestHome> {
               child: InkWell(
                 onTap: () {
                   Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => const DonationSubmissionForm(),
+                    FadeSlidePageRoute(
+                      page: const DonationSubmissionForm(),
                     ),
                   );
                 },

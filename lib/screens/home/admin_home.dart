@@ -9,6 +9,9 @@ import '../reports/reports_dashboard.dart';
 import '../../services/notification_service.dart';
 import '../../services/equipment_service.dart';
 import '../../services/rental_service.dart';
+import '../../services/auth_service.dart';
+import '../../utils/page_transitions.dart';
+import 'renter_home.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -21,6 +24,8 @@ class _AdminHomeState extends State<AdminHome> {
   final _notificationService = NotificationService();
   final _equipmentService = EquipmentService();
   final _rentalService = RentalService();
+  final _authService = AuthService();
+  bool _isRenterView = false;
 
   @override
   void initState() {
@@ -33,6 +38,101 @@ class _AdminHomeState extends State<AdminHome> {
 
   @override
   Widget build(BuildContext context) {
+    if (_isRenterView) {
+      return _buildFullRenterView();
+    }
+    return _buildAdminScaffold();
+  }
+
+  Widget _buildFullRenterView() {
+    final userId = _authService.currentUser?.uid;
+    final userName = _authService.currentUser?.displayName ?? 'Admin';
+    
+    return Scaffold(
+      backgroundColor: Colors.grey[900],
+      appBar: AppBar(
+        backgroundColor: Colors.green[400],
+        title: const Text('Renter Dashboard'),
+        actions: [
+          // Notification Bell with Badge
+          if (userId != null)
+            StreamBuilder<int>(
+              stream: _notificationService.getUnreadCount(userId),
+              builder: (context, snapshot) {
+                final unreadCount = snapshot.data ?? 0;
+                return Stack(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.notifications),
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => NotificationsScreen(
+                              userId: userId,
+                              isAdmin: false,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                    if (unreadCount > 0)
+                      Positioned(
+                        right: 8,
+                        top: 8,
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
+                          constraints: const BoxConstraints(
+                            minWidth: 18,
+                            minHeight: 18,
+                          ),
+                          child: Text(
+                            unreadCount > 9 ? '9+' : unreadCount.toString(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (context) => const ProfilePage()),
+              );
+            },
+          ),
+          // Switch back to Admin view
+          IconButton(
+            icon: const Icon(Icons.admin_panel_settings),
+            tooltip: 'Switch to Admin View',
+            onPressed: () {
+              setState(() {
+                _isRenterView = false;
+              });
+            },
+          ),
+        ],
+      ),
+      body: RenterHomeContent(
+        userId: userId,
+        userName: userName,
+        forceRenterView: true,
+      ),
+    );
+  }
+
+  Widget _buildAdminScaffold() {
     return Scaffold(
       backgroundColor: Colors.grey[900],
       appBar: AppBar(
@@ -96,9 +196,24 @@ class _AdminHomeState extends State<AdminHome> {
               );
             },
           ),
+          // Toggle to Renter view
+          IconButton(
+            icon: const Icon(Icons.person_outline),
+            tooltip: 'Switch to Renter View',
+            onPressed: () {
+              setState(() {
+                _isRenterView = true;
+              });
+            },
+          ),
         ],
       ),
-      body: SingleChildScrollView(
+      body: _buildAdminView(),
+    );
+  }
+
+  Widget _buildAdminView() {
+    return SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -176,8 +291,8 @@ class _AdminHomeState extends State<AdminHome> {
                   color: Colors.green[400]!,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const AddEditEquipmentScreen(),
+                      FadeSlidePageRoute(
+                        page: const AddEditEquipmentScreen(),
                       ),
                     );
                   },
@@ -190,9 +305,8 @@ class _AdminHomeState extends State<AdminHome> {
                   color: Colors.blue[400]!,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            const BrowseEquipmentScreen(showMyItemsOnly: true),
+                      FadeSlidePageRoute(
+                        page: const BrowseEquipmentScreen(showMyItemsOnly: true),
                       ),
                     );
                   },
@@ -205,8 +319,8 @@ class _AdminHomeState extends State<AdminHome> {
                   color: Colors.orange[400]!,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const AdminRentalList(),
+                      FadeSlidePageRoute(
+                        page: const AdminRentalList(),
                       ),
                     );
                   },
@@ -219,8 +333,8 @@ class _AdminHomeState extends State<AdminHome> {
                   color: Colors.orange[400]!,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const AdminDonationReview(),
+                      FadeSlidePageRoute(
+                        page: const AdminDonationReview(),
                       ),
                     );
                   },
@@ -233,8 +347,8 @@ class _AdminHomeState extends State<AdminHome> {
                   color: Colors.purple[400]!,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const ReportsDashboard(),
+                      FadeSlidePageRoute(
+                        page: const ReportsDashboard(),
                       ),
                     );
                   },
@@ -247,8 +361,8 @@ class _AdminHomeState extends State<AdminHome> {
                   color: Colors.teal[400]!,
                   onTap: () {
                     Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => const BrowseEquipmentScreen(),
+                      FadeSlidePageRoute(
+                        page: const BrowseEquipmentScreen(),
                       ),
                     );
                   },
@@ -334,8 +448,7 @@ class _AdminHomeState extends State<AdminHome> {
             ),
           ],
         ),
-      ),
-    );
+      );
   }
 
   Widget _buildActionCard(
@@ -346,11 +459,10 @@ class _AdminHomeState extends State<AdminHome> {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return Card(
-      color: Colors.grey[850],
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
+    return _AnimatedCard(
+      onTap: onTap,
+      child: Card(
+        color: Colors.grey[850],
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
@@ -408,6 +520,38 @@ class _AdminHomeState extends State<AdminHome> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Simple animated card with scale effect on tap
+class _AnimatedCard extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _AnimatedCard({required this.child, required this.onTap});
+
+  @override
+  State<_AnimatedCard> createState() => _AnimatedCardState();
+}
+
+class _AnimatedCardState extends State<_AnimatedCard> {
+  double _scale = 1.0;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTapDown: (_) => setState(() => _scale = 0.95),
+      onTapUp: (_) {
+        setState(() => _scale = 1.0);
+        widget.onTap();
+      },
+      onTapCancel: () => setState(() => _scale = 1.0),
+      child: AnimatedScale(
+        scale: _scale,
+        duration: const Duration(milliseconds: 100),
+        child: widget.child,
       ),
     );
   }

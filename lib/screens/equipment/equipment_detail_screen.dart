@@ -8,8 +8,13 @@ import 'add_edit_equipment_screen.dart';
 
 class EquipmentDetailScreen extends StatelessWidget {
   final EquipmentItem item;
+  final bool forceRenterView;
 
-  const EquipmentDetailScreen({super.key, required this.item});
+  const EquipmentDetailScreen({
+    super.key,
+    required this.item,
+    this.forceRenterView = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +34,7 @@ class EquipmentDetailScreen extends StatelessWidget {
               if (!snapshot.hasData) return const SizedBox.shrink();
 
               final user = snapshot.data!;
-              final isAdmin = user.role == UserRole.admin;
+              final isAdmin = user.role == UserRole.admin && !forceRenterView;
 
               if (!isAdmin) return const SizedBox.shrink();
 

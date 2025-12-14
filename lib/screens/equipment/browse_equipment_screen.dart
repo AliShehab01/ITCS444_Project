@@ -9,11 +9,13 @@ import 'add_edit_equipment_screen.dart';
 class BrowseEquipmentScreen extends StatefulWidget {
   final bool showMyItemsOnly;
   final String? initialSearchQuery;
+  final bool forceRenterView;
 
   const BrowseEquipmentScreen({
     super.key,
     this.showMyItemsOnly = false,
     this.initialSearchQuery,
+    this.forceRenterView = false,
   });
 
   @override
@@ -346,7 +348,7 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
   }
 
   Widget _buildEquipmentCard(EquipmentItem item) {
-    final isAdmin = _userRole == UserRole.admin;
+    final isAdmin = _userRole == UserRole.admin && !widget.forceRenterView;
 
     return Card(
       color: Colors.grey[850],
@@ -357,7 +359,10 @@ class _BrowseEquipmentScreenState extends State<BrowseEquipmentScreen> {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => EquipmentDetailScreen(item: item),
+              builder: (context) => EquipmentDetailScreen(
+                item: item,
+                forceRenterView: widget.forceRenterView,
+              ),
             ),
           ).then((_) => setState(() {})); // Refresh list when returning
         },
